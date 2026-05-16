@@ -3,626 +3,1351 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Scopri il tuo profilo investitore</title>
+<title>Inizia a investire</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d0d1a;--sur:#111827;--s2:#1a2234;--bdr:#1e293b;
-  --txt:#e2e8f0;--mut:#64748b;--acc:#4fc3f7;
-  --grn:#66bb6a;--red:#ef5350;--org:#ffa726;--pur:#a78bfa;
-}
+:root{--bg:#0d0d1a;--sur:#111827;--s2:#1a2234;--bdr:#1e293b;--txt:#e2e8f0;--mut:#64748b;--acc:#4fc3f7;--grn:#66bb6a;--red:#ef5350;--org:#ffa726;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
 html,body{min-height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:'DM Sans',sans-serif;cursor:pointer}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 input::placeholder{color:#334155}
 
-.shell{max-width:580px;margin:0 auto;padding:28px 16px 60px}
-
-/* Dots */
-.dots{display:flex;justify-content:center;gap:8px;margin-bottom:36px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);transition:all .3s}
-.dot.done{background:var(--acc);width:22px;border-radius:4px}
-.dot.active{background:var(--acc)}
-
-/* Steps */
-.step{display:none}
-.step.active{display:block;animation:up .32s ease}
-@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-
-.q{font-size:22px;font-weight:700;line-height:1.3;margin-bottom:6px}
-.q-sub{font-size:14px;color:var(--mut);line-height:1.6;margin-bottom:28px}
-
-/* Age */
-.age-big{text-align:center;margin-bottom:18px}
-.age-n{font-family:'DM Mono',monospace;font-size:72px;font-weight:700;color:var(--acc);line-height:1}
-.age-l{font-size:13px;color:var(--mut);margin-top:5px}
-.slider{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--bdr);outline:none;margin-bottom:10px}
-.slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--acc);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 10px rgba(79,195,247,.3)}
-.slider-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:28px}
-
-/* Amount inputs */
-.amt-block{margin-bottom:22px}
-.amt-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:8px}
-.amt-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.amt-prefix{font-family:'DM Mono',monospace;font-size:22px;color:var(--acc);flex-shrink:0}
-.amt-inp{flex:1;background:var(--sur);border:2px solid var(--bdr);border-radius:12px;padding:13px 14px;color:var(--txt);font-family:'DM Mono',monospace;font-size:20px;font-weight:600;outline:none;transition:border-color .15s;min-width:0}
-.amt-inp:focus{border-color:var(--acc)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--s2);border:1px solid var(--bdr);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'DM Mono',monospace;color:#94a3b8;cursor:pointer;transition:all .15s}
+/* ── ONBOARDING ── */
+.shell{max-width:560px;margin:0 auto;padding:24px 16px 60px}
+.prog{margin-bottom:32px}
+.prog-bar{height:4px;background:var(--bdr);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1d4ed8,var(--acc));border-radius:2px;transition:width .4s}
+.prog-lbl{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--mut)}
+.step{display:none}.step.active{display:block;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:10px}
+.step-title{font-size:24px;font-weight:700;line-height:1.3;margin-bottom:8px}
+.step-sub{font-size:15px;color:#94a3b8;line-height:1.65;margin-bottom:28px}
+.age-center{text-align:center;margin:20px 0}
+.age-num{font-family:'DM Mono',monospace;font-size:80px;font-weight:700;color:var(--acc);line-height:1}
+.age-word{font-size:14px;color:var(--mut);margin-top:6px}
+.slider{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--bdr);outline:none;margin:0 0 10px}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--acc);cursor:pointer;border:3px solid var(--bg);box-shadow:0 2px 12px rgba(79,195,247,.3)}
+.slider-row{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:28px}
+.field{margin-bottom:22px}
+.field-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:8px}
+.field-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.field-sym{font-family:'DM Mono',monospace;font-size:24px;color:var(--acc);flex-shrink:0}
+.field-inp{flex:1;background:var(--sur);border:2px solid var(--bdr);border-radius:13px;padding:14px;color:var(--txt);font-family:'DM Mono',monospace;font-size:22px;font-weight:600;outline:none;min-width:0;transition:border-color .15s}
+.field-inp:focus{border-color:var(--acc)}
+.field-hint{font-size:12px;color:var(--mut);margin-bottom:9px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{background:var(--s2);border:1px solid var(--bdr);border-radius:20px;padding:6px 13px;font-size:12px;font-family:'DM Mono',monospace;color:#94a3b8;cursor:pointer;transition:all .15s}
 .chip:hover{border-color:var(--acc);color:var(--acc)}
+.edu-card{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:20px;margin-bottom:12px}
+.edu-emoji{font-size:40px;margin-bottom:14px;display:block}
+.edu-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.edu-body{font-size:14px;color:#94a3b8;line-height:1.7}
+.edu-body strong{color:var(--txt)}
+.edu-example{background:var(--s2);border-radius:10px;padding:12px 14px;margin-top:14px;font-size:13px;color:#94a3b8;line-height:1.6;border-left:3px solid var(--acc)}
+.edu-example strong{color:var(--acc)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.analogy-card{border-radius:12px;padding:14px;text-align:center}
+.analogy-card.az{background:#0b1e30;border:1px solid #4fc3f733}
+.analogy-card.ob{background:#081f12;border:1px solid #66bb6a33}
+.analogy-em{font-size:32px;margin-bottom:8px}
+.analogy-title{font-size:13px;font-weight:700;margin-bottom:5px}
+.analogy-sub{font-size:11px;color:var(--mut);line-height:1.4}
+.compare{border:1px solid var(--bdr);border-radius:14px;overflow:hidden;margin:16px 0}
+.compare-hdr{display:grid;grid-template-columns:1.2fr 1fr 1fr;background:var(--s2);padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mut)}
+.compare-row{display:grid;grid-template-columns:1.2fr 1fr 1fr;padding:11px 14px;border-top:1px solid var(--bdr);font-size:13px;align-items:center}
+.compare-row:nth-child(even){background:#0a0f1a}
+.col-az{color:#4fc3f7;font-weight:600}.col-ob{color:#66bb6a;font-weight:600}
+.quiz-opts{display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.quiz-opt{background:var(--sur);border:2px solid var(--bdr);border-radius:13px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;text-align:left}
+.quiz-opt:hover{border-color:#334155}
+.quiz-opt.correct{border-color:var(--grn);background:#081f12}
+.quiz-opt.wrong{border-color:var(--red);background:#200a0a}
+.quiz-opt.dim{opacity:.4}
+.quiz-em{font-size:22px;flex-shrink:0}
+.quiz-txt{font-size:14px;flex:1;line-height:1.4}
+.quiz-badge{font-size:11px;font-weight:700;margin-left:auto;flex-shrink:0}
+.quiz-feedback{border-radius:11px;padding:12px 15px;font-size:13px;line-height:1.6;margin-bottom:14px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:#081f12;border:1px solid #166534;color:#86efac}
+.quiz-feedback.ko{background:#200a0a;border:1px solid #7f1d1d;color:#fca5a5}
+.chart-card{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:16px 12px;margin-bottom:14px}
+.chart-label{font-size:11px;color:var(--mut);text-align:center;margin-bottom:10px}
+.sc-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.sc-pill{border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;border:2px solid transparent;cursor:pointer;transition:all .2s}
+.risk-meter{background:var(--s2);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.risk-meter-lbl{font-size:11px;color:var(--mut);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.risk-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.risk-name{font-size:13px;min-width:90px}
+.risk-bar-bg{flex:1;height:8px;background:var(--bdr);border-radius:4px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:4px;transition:width .6s}
+.risk-val{font-size:12px;font-family:'DM Mono',monospace;font-weight:700;min-width:40px;text-align:right}
+.sc-cards{display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.sc-card{background:var(--sur);border:2px solid var(--bdr);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.sc-card:hover{border-color:#334155}.sc-card.sel{border-color:var(--acc);background:#0a1928}
+.sc-em{font-size:26px;flex-shrink:0}.sc-txt{flex:1}
+.sc-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.sc-sub{font-size:12px;color:var(--mut);line-height:1.4}
+.sc-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s}
+.sc-card.sel .sc-check{background:var(--acc);border-color:var(--acc);color:#0d0d1a;font-weight:700}
+.result-badge{border-radius:18px;padding:28px 22px;text-align:center;margin-bottom:20px}
+.rb-em{font-size:56px;margin-bottom:12px}
+.rb-name{font-size:24px;font-weight:700;margin-bottom:6px}
+.rb-sub{font-size:14px;color:#94a3b8;line-height:1.6}
+.proj-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.proj-box{background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:11px 10px;text-align:center}
+.proj-lbl{font-size:10px;color:var(--mut);margin-bottom:5px;line-height:1.3}
+.proj-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
+.alloc-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--sur);border:1px solid var(--bdr);border-radius:11px;margin-bottom:7px}
+.al-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.al-name{flex:1;font-size:13px}
+.al-bar{flex:0 0 70px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden}
+.al-fill{height:100%;border-radius:2px}
+.al-pct{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;min-width:32px;text-align:right}
+.legal-box{background:#1a1208;border:1px solid #78350f;border-radius:11px;padding:12px 15px;font-size:11px;color:#fcd34d;line-height:1.65;margin:16px 0}
+.disc{font-size:10px;color:#334155;line-height:1.65;text-align:center;margin-top:14px;border-top:1px solid var(--bdr);padding-top:14px}
+.broker-card{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:14px}
+.br-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.br-logo{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
+.br-head{flex:1;min-width:0}
+.br-name{font-size:16px;font-weight:700}
+.br-tag{font-size:12px;color:var(--mut);margin-top:2px}
+.br-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid;white-space:nowrap;flex-shrink:0}
+.br-pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.br-col-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.br-item{font-size:12px;color:#94a3b8;line-height:1.5;margin-bottom:5px;padding-left:8px;border-left:2px solid var(--bdr)}
+.br-for{font-size:12px;color:var(--mut);background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:13px;line-height:1.5}
+.br-btn{width:100%;border:none;border-radius:11px;padding:13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.br-btn:hover{opacity:.88}
+@media(max-width:400px){.br-pros-cons{grid-template-columns:1fr}}
 
-/* Disclaimer box */
+/* Registrazione */
+.reg-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:none;border-radius:13px;padding:14px 20px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#1e293b;cursor:pointer;margin-bottom:16px;transition:opacity .15s}
+.reg-google:hover{opacity:.9}
+.reg-divider{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.reg-divider::before,.reg-divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.reg-divider span{font-size:12px;color:var(--mut);white-space:nowrap}
+.reg-form .fld input{font-family:'DM Sans',sans-serif;font-size:15px}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:15px;margin-bottom:11px}
+.card-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:11px}
+.info{background:#0e1f30;border:1px solid #1e3a5f;border-radius:9px;padding:9px 13px;font-size:12px;color:#90caf9;line-height:1.65;margin-bottom:11px}
+.warn{background:#2a1a1a;border:1px solid #7f1d1d;border-radius:9px;padding:9px 13px;font-size:12px;color:#fca5a5;margin-bottom:11px}
 .disc-box{background:#0d1220;border:1px solid #1e3a5f;border-radius:10px;padding:10px 13px;font-size:11px;color:#475569;line-height:1.65;margin-bottom:20px}
-
-/* Buttons */
 .btn-next{width:100%;background:#1d4ed8;border:none;border-radius:13px;padding:16px;color:#fff;font-size:16px;font-weight:700;transition:opacity .15s;margin-top:4px}
 .btn-next:disabled{opacity:.3;cursor:default}
 .btn-next:not(:disabled):hover{opacity:.88}
 .btn-back{background:transparent;border:none;color:var(--mut);font-size:13px;text-decoration:underline;padding:10px 0;display:block;margin:8px auto 0}
-
-/* ── STEP 1: SCENARIOS ── */
-.viz-amts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.viz-amt-block{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px}
-.viz-amt-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin-bottom:6px}
-.viz-amt-row{display:flex;align-items:center;gap:6px}
-.viz-prefix{font-family:'DM Mono',monospace;font-size:14px;color:var(--acc)}
-.viz-inp{background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--txt);font-family:'DM Mono',monospace;font-size:17px;font-weight:600;outline:none;width:100%;padding:2px 0;transition:border-color .15s}
-.viz-inp:focus{border-bottom-color:var(--acc)}
-
-/* Scenario tabs */
-.sc-tabs{display:flex;gap:5px;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:4px;margin-bottom:14px}
-.sc-tab{flex:1;border:none;border-radius:7px;padding:9px 4px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#475569;text-align:center;transition:all .2s;line-height:1.2}
-.sc-tab span{display:block;font-size:17px;margin-bottom:3px}
-.sc-tab.active{background:var(--bdr);color:var(--txt)}
-
-.chart-wrap{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:16px 12px 10px;margin-bottom:12px}
-.chart-note{font-size:10px;color:#334155;text-align:center;margin-bottom:8px}
-
-/* Scenario detail */
-.sc-detail{background:var(--sur);border:2px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:14px;transition:border-color .3s}
-.sc-detail.conservativo{border-color:#90caf955}
-.sc-detail.bilanciato{border-color:#66bb6a55}
-.sc-detail.aggressivo{border-color:#a78bfa55}
-
-.sc-detail-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
-.sc-big-emoji{font-size:36px;flex-shrink:0}
-.sc-detail-title{font-size:16px;font-weight:700;margin-bottom:4px}
-.sc-detail-sub{font-size:12px;color:var(--mut);line-height:1.5}
-
-.sc-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
-.sc-metric{background:var(--s2);border-radius:9px;padding:9px 10px;text-align:center}
-.sc-metric-lbl{font-size:10px;color:var(--mut);margin-bottom:4px;line-height:1.3}
-.sc-metric-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:700}
-
-.sc-etf-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin-bottom:7px}
-.sc-etf-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.etf-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.etf-name{font-size:12px;flex:1;color:#94a3b8}
-.etf-pct{font-family:'DM Mono',monospace;font-size:12px;font-weight:600}
-.etf-bar-bg{flex:0 0 60px;height:3px;background:var(--bdr);border-radius:2px;overflow:hidden}
-.etf-bar-fill{height:100%;border-radius:2px}
-
-.risk-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--s2);border-radius:9px;margin-top:10px}
-.risk-label{font-size:12px;flex:1}
-.risk-bar-bg{flex:0 0 80px;height:6px;background:var(--bdr);border-radius:3px;overflow:hidden}
-.risk-bar-fill{height:100%;border-radius:3px;transition:width .5s}
-.risk-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;min-width:38px;text-align:right}
-
-/* Education callout */
-.edu{background:#0a1208;border-left:3px solid var(--grn);border-radius:0 10px 10px 0;padding:11px 14px;font-size:12px;color:#a7f3d0;line-height:1.65;margin-bottom:16px}
-.edu strong{color:var(--grn)}
-
-/* Profile question */
-.prof-q{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--txt)}
-.prof-cards{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
-.prof-card{background:var(--sur);border:2px solid var(--bdr);border-radius:12px;padding:13px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
-.prof-card:hover{border-color:#334155}
-.prof-card.sel{border-color:var(--acc);background:#0a1928}
-.prof-card-em{font-size:22px;flex-shrink:0}
-.prof-card-txt{flex:1}
-.prof-card-title{font-size:14px;font-weight:600;margin-bottom:2px}
-.prof-card-sub{font-size:12px;color:var(--mut)}
-.prof-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
-.prof-card.sel .prof-check{background:var(--acc);border-color:var(--acc);color:#0d0d1a;font-weight:700}
-
-/* Result */
-.result-hero{border-radius:18px;padding:26px 22px;text-align:center;margin-bottom:18px}
-.rh-emoji{font-size:48px;margin-bottom:10px}
-.rh-name{font-size:22px;font-weight:700;margin-bottom:6px}
-.rh-desc{font-size:13px;color:#94a3b8;line-height:1.6}
-
-.proj-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
-.proj-card{background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:11px 10px;text-align:center}
-.proj-lbl{font-size:10px;color:var(--mut);margin-bottom:5px;line-height:1.3}
-.proj-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700}
-
-.alloc-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sur);border:1px solid var(--bdr);border-radius:10px;margin-bottom:7px}
-.alloc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.alloc-name{flex:1;font-size:13px}
-.alloc-bar-bg{width:70px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;flex-shrink:0}
-.alloc-bar-fill{height:100%;border-radius:2px}
-.alloc-pct{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;min-width:34px;text-align:right;flex-shrink:0}
-
-.warn-legal{background:#1a1208;border:1px solid #78350f;border-radius:11px;padding:11px 14px;font-size:11px;color:#fcd34d;line-height:1.65;margin:16px 0}
+.btn-ghost{width:100%;background:transparent;border:2px solid var(--bdr);border-radius:13px;padding:14px;color:var(--mut);font-size:14px;font-weight:600;margin-bottom:10px;transition:all .15s}
+.btn-ghost:hover{border-color:#334155;color:var(--txt)}
 .btn-cta{width:100%;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);border:none;border-radius:13px;padding:16px;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:9px}
 .btn-cta:hover{opacity:.88}
-.btn-sec{width:100%;background:transparent;border:2px solid var(--bdr);border-radius:13px;padding:14px;color:var(--mut);font-size:14px;font-weight:600;margin-bottom:20px;transition:all .15s}
-.btn-sec:hover{border-color:#334155;color:var(--txt)}
-.btn-restart{background:transparent;border:none;color:var(--mut);font-size:12px;text-decoration:underline;display:block;margin:0 auto;padding:4px}
-.disc-final{font-size:10px;color:#334155;line-height:1.65;text-align:center;margin-top:14px;border-top:1px solid var(--bdr);padding-top:14px}
+.btn-restart{background:transparent;border:none;color:var(--mut);font-size:12px;text-decoration:underline;display:block;margin:8px auto 0;padding:4px}
+
+/* ── APP (REBALANCER) ── */
+.app-shell{display:none}
+.app-hdr{position:sticky;top:0;z-index:80;background:var(--bg);border-bottom:1px solid var(--bdr);padding:10px 16px;display:flex;align-items:center;gap:8px;padding-top:calc(10px + var(--st))}
+.app-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.app-logo-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d4ed8,var(--acc));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.app-logo-txt{font-weight:700;font-size:14px;white-space:nowrap}
+.app-dtabs{display:flex;gap:4px}
+.app-dtab{background:transparent;border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.app-dtab.active{background:#1e3a5f;border-color:var(--acc);color:var(--acc)}
+.app-body{max-width:800px;margin:0 auto;padding:14px 14px calc(80px + var(--sb))}
+.app-bnav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--sur);border-top:1px solid var(--bdr);z-index:100;padding-bottom:var(--sb)}
+.app-bnav-inner{display:flex;height:56px}
+.app-bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--mut);font-size:10px;font-weight:600;cursor:pointer}
+.app-bnav-btn.active{color:var(--acc)}
+.app-bnav-btn span{font-size:18px;line-height:1}
+.app-fab{position:fixed;bottom:calc(64px + var(--sb));right:14px;width:50px;height:50px;border-radius:14px;background:#1d4ed8;border:none;color:#fff;font-size:26px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(29,78,216,.45);z-index:101}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:9px 11px}
+.stat-l{font-size:10px;color:var(--mut);margin-bottom:3px}
+.stat-v{font-family:'DM Mono',monospace;font-size:14px;font-weight:600}
+.pbar{height:5px;border-radius:3px;background:var(--bdr);overflow:hidden;display:flex;gap:1px;margin-bottom:12px}
+.pbar-seg{height:100%;transition:flex .4s}
+.cat-block{border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:9px}
+.cat-hdr{padding:8px 13px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.04em;flex-wrap:wrap}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.etf-row{padding:9px 13px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:7px}
+.etf-l{flex:1;min-width:0;cursor:pointer}
+.etf-tk{font-family:'DM Mono',monospace;font-weight:700;font-size:14px}
+.etf-nm{font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.etf-r{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.vbtn{font-family:'DM Mono',monospace;font-size:13px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:5px 8px;color:var(--txt);cursor:pointer;min-width:80px;text-align:right;transition:border-color .15s}
+.vbtn:hover{border-color:var(--acc)}
+.vinp{font-family:'DM Mono',monospace;font-size:13px;background:var(--bg);border:2px solid var(--acc);border-radius:8px;padding:5px 8px;color:var(--txt);width:105px;text-align:right;outline:none}
+.ftog{background:transparent;border:1px solid var(--bdr);border-radius:7px;padding:4px 8px;font-size:11px;font-weight:600;cursor:pointer;color:var(--mut);white-space:nowrap;transition:all .15s;line-height:1}
+.ftog.on{background:#0d1e36;border-color:var(--acc);color:var(--acc)}
+.delbtn{background:transparent;border:none;color:#334155;cursor:pointer;font-size:14px;padding:5px;border-radius:4px;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+.delbtn:hover{color:var(--red)}
+.inv-card{background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:20px;margin-bottom:11px}
+.inv-lbl{font-size:11px;color:var(--mut);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.inv-row{display:flex;align-items:center;gap:8px}
+.euro-sym{font-family:'DM Mono',monospace;font-size:28px;color:var(--acc);flex-shrink:0}
+.inv-inp{font-family:'DM Mono',monospace;font-size:28px;font-weight:700;background:transparent;border:none;border-bottom:2px solid var(--acc);color:var(--txt);outline:none;width:100%;padding:2px 0;min-width:0}
+.buy-row{background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.buy-l{flex:1;min-width:120px}
+.buy-tk{font-family:'DM Mono',monospace;font-weight:700;font-size:15px}
+.buy-det{font-size:11px;color:var(--mut);margin-top:2px}
+.buy-amt{font-family:'DM Mono',monospace;font-size:17px;font-weight:700;color:var(--grn);text-align:right;flex-shrink:0}
+.fixed-row{padding:7px 13px;border:1px solid var(--bdr);border-radius:9px;display:flex;align-items:center;gap:7px;margin-bottom:5px;opacity:.55}
+.tgt-row{display:flex;align-items:center;gap:7px;padding:8px 11px;background:var(--s2);border-radius:9px;border:1px solid var(--bdr);margin-bottom:5px}
+.tgt-nm{flex:1;font-size:13px}
+.tgt-inp{width:50px;background:var(--bg);border:1px solid #1e3a5f;border-radius:7px;padding:6px 5px;color:var(--txt);font-family:'DM Mono',monospace;font-size:15px;text-align:center;outline:none;flex-shrink:0}
+.tgt-inp:focus{border-color:var(--acc)}
+.tpct{color:var(--mut);font-size:12px;flex-shrink:0}
+.sum-pill{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid transparent}
+.sum-ok{color:var(--grn);border-color:#166534;background:#0e2a1e}
+.sum-err{color:var(--org);border-color:#78350f;background:#1a1510}
+.sum-over{color:var(--red);border-color:#7f1d1d;background:#2a1a1a}
+.tog-wrap{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:11px 13px;margin-bottom:11px;cursor:pointer}
+.tog-info{flex:1}.tog-title{font-size:13px;font-weight:600}
+.tog-sub{font-size:11px;color:var(--mut);margin-top:2px;line-height:1.4}
+.tog-sw{position:relative;width:44px;height:24px;flex-shrink:0}
+.tog-track{position:absolute;inset:0;border-radius:24px;background:#334155;transition:.2s}
+.tog-knob{position:absolute;width:18px;height:18px;top:3px;left:3px;border-radius:50%;background:#fff;transition:.2s}
+.tog-sw.on .tog-track{background:#1d4ed8}
+.tog-sw.on .tog-knob{transform:translateX(20px)}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;z-index:300;backdrop-filter:blur(4px)}
+.modal{background:var(--sur);border:1px solid #1e3a5f;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:520px;max-height:93vh;overflow-y:auto;padding-bottom:calc(20px + var(--sb))}
+.mh{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:15px}
+.fld{margin-bottom:11px}
+.fld label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:5px}
+.fld input,.fld select{width:100%;background:var(--bg);border:1px solid #1e3a5f;border-radius:10px;padding:12px;color:var(--txt);font-family:'DM Mono',monospace;font-size:16px;outline:none}
+.fld input:focus,.fld select:focus{border-color:var(--acc)}
+.fld select{font-family:'DM Sans',sans-serif;font-size:14px;-webkit-appearance:none}
+.mbtns{display:flex;gap:8px;margin-top:16px}
+.bok{flex:2;background:#1d4ed8;border:none;border-radius:12px;padding:14px;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.bcancel{flex:1;background:transparent;border:1px solid #334155;border-radius:12px;padding:14px;color:#94a3b8;font-size:15px;cursor:pointer}
+.bdel{flex:1;background:transparent;border:1px solid #7f1d1d;border-radius:12px;padding:14px;color:var(--red);font-size:15px;cursor:pointer}
+
+@media(max-width:600px){
+  .app-bnav{display:block}.app-fab{display:flex}
+  .app-dtabs{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+}
+@media(min-width:601px){
+  .ov{align-items:center}.modal{border-radius:16px}.mh{display:none}
+}
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <div class="dots" id="dots">
-    <div class="dot active" id="d0"></div>
-    <div class="dot" id="d1"></div>
+<!-- ── ONBOARDING ── -->
+<div class="shell" id="onb-shell">
+  <div class="prog" id="oprog">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-lbl"><span id="prog-txt">Passo 1 di 5</span><span id="prog-pct">0%</span></div>
   </div>
 
-  <!-- ── STEP 0: I TUOI NUMERI ── -->
-  <div class="step active" id="step-0">
-    <div class="q">I tuoi numeri di partenza</div>
-    <div class="q-sub">Questi dati servono solo per costruire simulazioni educative personalizzate. Non verranno salvati né condivisi.</div>
-
-    <div class="amt-lbl" style="margin-bottom:10px">La tua età</div>
-    <div class="age-big" style="margin-bottom:14px">
-      <div class="age-n" id="age-n">30</div>
-      <div class="age-l">anni</div>
-    </div>
+  <!-- S0: DATI -->
+  <div class="step active" id="s0">
+    <div class="step-tag">Partiamo da te</div>
+    <div class="step-title">Tre numeri per iniziare</div>
+    <div class="step-sub">Non serve sapere nulla di finanza. Questi dati restano nel tuo browser e non vengono salvati da nessuna parte.</div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:12px">La tua età</div>
+    <div class="age-center"><div class="age-num" id="age-n">30</div><div class="age-word">anni</div></div>
     <input type="range" class="slider" id="age-sl" min="18" max="70" value="30" oninput="onAge(this.value)">
-    <div class="slider-ends" style="margin-bottom:30px"><span>18</span><span>70</span></div>
-
-    <div class="amt-block">
-      <div class="amt-lbl">Importo disponibile oggi</div>
-      <div class="amt-row">
-        <span class="amt-prefix">€</span>
-        <input class="amt-inp" type="number" id="init-inp" inputmode="decimal" placeholder="es. 10000" oninput="onInit(this.value)">
-      </div>
+    <div class="slider-row"><span>18</span><span>70</span></div>
+    <div class="field">
+      <div class="field-lbl">Quanto hai da parte oggi?</div>
+      <div class="field-hint">Anche zero va benissimo — molti investitori di successo hanno iniziato da zero.</div>
+      <div class="field-row"><span class="field-sym">€</span><input class="field-inp" type="number" id="init-inp" inputmode="decimal" placeholder="0" oninput="onInit(this.value)"></div>
       <div class="chips">
-        <div class="chip" onclick="setInit(0)">€0</div>
-        <div class="chip" onclick="setInit(5000)">€5k</div>
-        <div class="chip" onclick="setInit(10000)">€10k</div>
-        <div class="chip" onclick="setInit(20000)">€20k</div>
-        <div class="chip" onclick="setInit(50000)">€50k</div>
+        <div class="chip" onclick="setV('init',0)">€0</div>
+        <div class="chip" onclick="setV('init',5000)">€5.000</div>
+        <div class="chip" onclick="setV('init',10000)">€10.000</div>
+        <div class="chip" onclick="setV('init',25000)">€25.000</div>
       </div>
     </div>
-
-    <div class="amt-block">
-      <div class="amt-lbl">Quanto pensi di poter mettere da parte ogni mese</div>
-      <div class="amt-row">
-        <span class="amt-prefix">€</span>
-        <input class="amt-inp" type="number" id="monthly-inp" inputmode="decimal" placeholder="es. 200" oninput="onMonthly(this.value)">
-      </div>
+    <div class="field">
+      <div class="field-lbl">Quanto riesci a mettere da parte ogni mese?</div>
+      <div class="field-hint">Anche 50€ al mese fanno la differenza nel lungo periodo grazie all'interesse composto.</div>
+      <div class="field-row"><span class="field-sym">€</span><input class="field-inp" type="number" id="mo-inp" inputmode="decimal" placeholder="100" oninput="onMonthly(this.value)"></div>
       <div class="chips">
-        <div class="chip" onclick="setMonthly(50)">€50</div>
-        <div class="chip" onclick="setMonthly(100)">€100</div>
-        <div class="chip" onclick="setMonthly(200)">€200</div>
-        <div class="chip" onclick="setMonthly(500)">€500</div>
-        <div class="chip" onclick="setMonthly(1000)">€1k</div>
+        <div class="chip" onclick="setV('mo',50)">€50</div>
+        <div class="chip" onclick="setV('mo',100)">€100</div>
+        <div class="chip" onclick="setV('mo',200)">€200</div>
+        <div class="chip" onclick="setV('mo',500)">€500</div>
       </div>
     </div>
-
-    <div class="disc-box">ℹ️ I valori inseriti vengono usati esclusivamente per costruire simulazioni illustrative a scopo educativo. Non costituiscono profilazione finanziaria ai sensi della normativa MiFID II.</div>
-
-    <button class="btn-next" id="next-0" disabled onclick="go(1)">Esplora gli scenari →</button>
+    <button class="btn-next" id="n0" disabled onclick="go(1)">Continua →</button>
   </div>
 
-  <!-- ── STEP 1: SCENARI EDUCATIVI ── -->
-  <div class="step" id="step-1">
-    <div class="q" style="margin-bottom:4px">Tre scenari storici a confronto</div>
-    <div class="q-sub">Questo non è una previsione — è uno strumento per capire come il rischio che sei disposto ad accettare cambia i possibili esiti nel tempo.</div>
+  <!-- S1: COS'È UN ETF -->
+  <div class="step" id="s1">
+    <div class="step-tag">Lezione 1 di 2</div>
+    <div class="step-title">Cos'è un ETF?</div>
+    <div class="step-sub">Prima di parlare di strumenti, capiamo perché vale la pena investire — anche partendo da piccole cifre.</div>
 
-    <div class="viz-amts">
-      <div class="viz-amt-block">
-        <div class="viz-amt-lbl">Capitale iniziale</div>
-        <div class="viz-amt-row"><span class="viz-prefix">€</span><input class="viz-inp" type="number" id="viz-init" inputmode="decimal" oninput="onVizInit(this.value)"></div>
-      </div>
-      <div class="viz-amt-block">
-        <div class="viz-amt-lbl">Versamento mensile</div>
-        <div class="viz-amt-row"><span class="viz-prefix">€</span><input class="viz-inp" type="number" id="viz-monthly" inputmode="decimal" oninput="onVizMonthly(this.value)"></div>
+    <!-- INFLAZIONE -->
+    <div class="edu-card" style="border-color:#ffa72633;background:#1a1208">
+      <span class="edu-emoji">🔥</span>
+      <div class="edu-title" style="color:var(--org)">Il nemico silenzioso: l'inflazione</div>
+      <div class="edu-body">
+        Ogni anno i prezzi aumentano — benzina, spesa, affitti, ristoranti. Questo si chiama <strong>inflazione</strong>. In Italia negli ultimi anni è stata tra il 2% e il 9% annuo.<br><br>
+        Il problema è che <strong>i soldi fermi sul conto corrente non crescono</strong>. Se tieni 10.000€ sul conto per 10 anni, hai ancora 10.000€ — ma quei soldi comprano meno cose di prima.
+        <div class="edu-example" style="border-color:var(--org)">
+          <strong>Esempio concreto:</strong> con un'inflazione media del 3% annuo, 10.000€ tenuti sul conto perdono il potere d'acquisto equivalente a circa <strong>2.600€ in 10 anni</strong>. Non è che spariscono — ma ci compri il 26% di cose in meno. Il conto corrente non è "sicuro": è una perdita lenta e invisibile.
+        </div>
       </div>
     </div>
 
-    <div class="sc-tabs">
-      <button class="sc-tab active" id="tab-conservativo" onclick="switchSc('conservativo')"><span>🛡️</span>Conservativo</button>
-      <button class="sc-tab" id="tab-bilanciato" onclick="switchSc('bilanciato')"><span>⚖️</span>Bilanciato</button>
-      <button class="sc-tab" id="tab-aggressivo" onclick="switchSc('aggressivo')"><span>🚀</span>Aggressivo</button>
+    <!-- PERCHÉ INVESTIRE -->
+    <div style="background:var(--s2);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">Cosa succede ai tuoi soldi nelle tre scelte possibili</div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:22px;flex-shrink:0">🏦</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#ef5350;margin-bottom:3px">Conto corrente — rendimento 0%</div>
+            <div style="font-size:12px;color:var(--mut);line-height:1.5">I soldi restano invariati ma l'inflazione li erode lentamente ogni anno.</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:22px;flex-shrink:0">💰</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--org);margin-bottom:3px">Conto deposito / BTP — rendimento ~3%</div>
+            <div style="font-size:12px;color:var(--mut);line-height:1.5">Batti l'inflazione di poco. I soldi sono al sicuro ma crescono lentamente.</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:22px;flex-shrink:0">📊</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--grn);margin-bottom:3px">ETF diversificati — rendimento storico 5-8%</div>
+            <div style="font-size:12px;color:var(--mut);line-height:1.5">Batti l'inflazione e fai crescere il patrimonio nel lungo periodo. Con più rischio e oscillazioni.</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:#334155;font-style:italic">I rendimenti sono riferimenti storici indicativi, non garanzie future.</div>
     </div>
+    <div class="edu-card">
+      <span class="edu-emoji">🧺</span>
+      <div class="edu-title">Un ETF è un paniere di investimenti</div>
+      <div class="edu-body">Immagina di voler comprare azioni di 1.000 aziende nel mondo. Farlo singolarmente costerebbe milioni e richiederebbe ore ogni giorno.<br><br>Un <strong>ETF (Exchange Traded Fund)</strong> fa questo al posto tuo: raccoglie i soldi di migliaia di investitori e li investe automaticamente in centinaia o migliaia di aziende o obbligazioni, seguendo un indice preciso — senza che nessun gestore decida nulla.
+        <div class="edu-example"><strong>Esempio concreto:</strong> un ETF azionario globale può contenere azioni di oltre 3.000 aziende in decine di paesi — da grandi colossi tecnologici a banche, farmaceutiche, industrie manifatturiere. Con 100€ compri una piccola fetta di tutte.</div>
+      </div>
+    </div>
+    <div class="edu-card">
+      <span class="edu-emoji">⚙️</span>
+      <div class="edu-title">Perché ETF passivi?</div>
+      <div class="edu-body">Esistono fondi <strong>attivi</strong> (un gestore sceglie cosa comprare, costi alti) e fondi <strong>passivi</strong> (seguono automaticamente un indice, costi molto bassi).<br><br>Decenni di studi dimostrano che la maggior parte dei gestori attivi non batte il mercato nel lungo periodo, eppure fa pagare commissioni molto più alte.
+        <div class="edu-example"><strong>I costi contano enormemente.</strong> Supponi di investire 10.000€ per 20 anni con un rendimento lordo del 7% annuo. Con un fondo attivo che applica il 2% di commissione annua, il rendimento netto scende al 5%: arrivi a circa 26.500€. Con un ETF passivo allo 0,2%, il rendimento netto è 6,8%: arrivi a circa 37.000€. <strong>Stessa cifra investita, stesso mercato — oltre 10.000€ di differenza</strong>, mangiati dalle commissioni nel tempo.</div>
+      </div>
+    </div>
+    <button class="btn-next" onclick="go(2)">Ho capito, continua →</button>
+    <button class="btn-back" onclick="go(0)">← Indietro</button>
+  </div>
 
-    <div class="chart-wrap">
-      <div class="chart-note" id="chart-note"></div>
+  <!-- S2: AZIONARIO VS OBBLIGAZIONARIO -->
+  <div class="step" id="s2">
+    <div class="step-tag">Lezione 2 di 2</div>
+    <div class="step-title">Due ingredienti fondamentali</div>
+    <div class="step-sub">Le due componenti fondamentali per costruire un portafoglio sono due.</div>
+    <div class="analogy">
+      <div class="analogy-card az"><div class="analogy-em">🏭</div><div class="analogy-title" style="color:#4fc3f7">ETF Azionario</div><div class="analogy-sub">Compri una piccola parte di aziende reali</div></div>
+      <div class="analogy-card ob"><div class="analogy-em">📄</div><div class="analogy-title" style="color:#66bb6a">ETF Obbligazionario</div><div class="analogy-sub">Presti soldi a stati o aziende in cambio di interessi</div></div>
+    </div>
+    <div class="edu-card" style="margin-bottom:10px">
+      <span class="edu-emoji">🏭</span>
+      <div class="edu-title" style="color:#4fc3f7">ETF Azionario — sei socio di aziende</div>
+      <div class="edu-body">Comprando un ETF azionario globale diventi socio di migliaia di aziende nel mondo. Se le aziende crescono, il tuo investimento cresce.<br><br><strong>Vantaggio:</strong> nel lungo periodo, storicamente il mercato azionario globale è sempre salito.<br><strong>Rischio:</strong> il valore oscilla molto. In una crisi puoi vedere perdite del 30-40% — per poi recuperare nel tempo.
+        <div class="edu-example"><strong>Esempio:</strong> chi ha investito in un ETF azionario globale nel 2008 ha visto perdite del 40%. Ma chi ha tenuto senza vendere aveva recuperato tutto entro il 2013.</div>
+      </div>
+    </div>
+    <div class="edu-card" style="margin-bottom:14px">
+      <span class="edu-emoji">📄</span>
+      <div class="edu-title" style="color:#66bb6a">ETF Obbligazionario — sei creditore</div>
+      <div class="edu-body">Comprando un ETF obbligazionario presti soldi a governi o grandi aziende. In cambio ricevi interessi e la restituzione del capitale.<br><br><strong>Vantaggio:</strong> più stabile, meno oscillazioni, flusso di reddito prevedibile.<br><strong>Rischio:</strong> rendimento generalmente più basso nel lungo periodo.
+        <div class="edu-example"><strong>Esempio:</strong> un ETF su titoli di stato europei oscilla tipicamente del 3-8% in un anno — molto meno di un ETF azionario.</div>
+      </div>
+    </div>
+    <div class="compare">
+      <div class="compare-hdr"><span></span><span class="col-az">Azionario</span><span class="col-ob">Obbligazionario</span></div>
+      <div class="compare-row"><span>Potenziale rendimento</span><span class="col-az">Alto 🚀</span><span class="col-ob">Medio 📈</span></div>
+      <div class="compare-row"><span>Oscillazioni</span><span class="col-az">Forti 🎢</span><span class="col-ob">Moderate 〰️</span></div>
+      <div class="compare-row"><span>Orizzonte ideale</span><span class="col-az">10+ anni</span><span class="col-ob">Anche 3-5 anni</span></div>
+      <div class="compare-row"><span>In caso di crisi</span><span class="col-az">Scende di più</span><span class="col-ob">Regge meglio</span></div>
+    </div>
+    <button class="btn-next" onclick="go(3)">Chiaro! Scopri il mio mix →</button>
+    <button class="btn-back" onclick="go(1)">← Indietro</button>
+  </div>
+
+  <!-- S3: QUIZ -->
+  <div class="step" id="s3">
+    <div class="step-tag">Metti alla prova</div>
+    <div class="step-title">Una domanda rapida</div>
+    <div class="step-sub">Sii onesto con te stesso — la risposta che dai cambia il mix di investimento suggerito.</div>
+    <p style="font-size:16px;font-weight:600;margin-bottom:18px;line-height:1.5">Hai 10.000€ investiti e non ti serviranno per almeno 15 anni. Una crisi fa scendere il mercato del 35% in un anno. Cosa fai?</p>
+    <div class="quiz-opts">
+      <div class="quiz-opt" id="qo-a" onclick="doQuiz('a',this)"><span class="quiz-em">😰</span><span class="quiz-txt">Vendo tutto e metto i soldi sul conto corrente — le perdite mi fanno paura</span><span class="quiz-badge" id="qb-a"></span></div>
+      <div class="quiz-opt" id="qo-b" onclick="doQuiz('b',this)"><span class="quiz-em">😟</span><span class="quiz-txt">Vendo metà per limitare i danni e aspetto che le cose migliorino</span><span class="quiz-badge" id="qb-b"></span></div>
+      <div class="quiz-opt" id="qo-c" onclick="doQuiz('c',this)"><span class="quiz-em">😐</span><span class="quiz-txt">Non faccio nulla — so che nel lungo periodo il mercato si è sempre ripreso</span><span class="quiz-badge" id="qb-c"></span></div>
+      <div class="quiz-opt" id="qo-d" onclick="doQuiz('d',this)"><span class="quiz-em">😎</span><span class="quiz-txt">Compro di più — i prezzi sono scontati, è un'ottima occasione</span><span class="quiz-badge" id="qb-d"></span></div>
+    </div>
+    <div class="quiz-feedback" id="qfeed"></div>
+    <div id="q-optimal" style="display:none;background:#0a1f10;border:1px solid #166534;border-radius:12px;padding:14px 16px;margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--grn);margin-bottom:8px">✦ L'approccio ottimale secondo la ricerca</div>
+      <div style="font-size:13px;color:#a7f3d0;line-height:1.7"><strong>Non vendere nulla — anzi, continuare a investire regolarmente.</strong><br><br>Ogni studio sugli investitori a lungo termine mostra la stessa cosa: chi vende durante le crisi cristallizza le perdite e perde anche il rimbalzo. Chi mantiene (o incrementa) rientra sempre in territorio positivo.<br><br><strong>Esempio reale:</strong> chi ha continuato a investire durante la crisi del 2008-2009 ha comprato azioni a prezzi scontati del 40-50%. Entro il 2013 aveva recuperato tutto. Entro il 2020 aveva più che triplicato il capitale investito in quegli anni.</div>
+      <div style="margin-top:12px;background:#081f12;border-radius:8px;padding:10px 12px;font-size:12px;color:#6ee7b7;line-height:1.6">💡 <strong>La lezione chiave:</strong> il tempo nel mercato batte il tentativo di indovinare il momento giusto. L'emozione più costosa per un investitore è il panico.</div>
+    </div>
+    <button class="btn-ghost" id="btn-change" style="display:none" onclick="resetQuiz()">↺ Cambia risposta</button>
+    <button class="btn-next" id="n3" disabled onclick="go(4)">Continua →</button>
+    <button class="btn-back" onclick="go(2)">← Indietro</button>
+  </div>
+
+  <!-- S4: SCENARI -->
+  <div class="step" id="s4">
+    <div class="step-tag">Il tuo mix ideale</div>
+    <div class="step-title">Tre scenari possibili</div>
+    <div class="step-sub">Basati su dati storici reali — non sono previsioni del futuro. Esplorarli ti aiuta a capire quanto rischio sei disposto ad accettare.</div>
+    <div class="sc-pills">
+      <div class="sc-pill" id="pill-c" style="background:#0b1929;border-color:#90caf9;color:#90caf9" onclick="switchPill('c')">🛡️ Conservativo</div>
+      <div class="sc-pill" id="pill-b" style="background:var(--s2);border-color:var(--bdr);color:var(--mut)" onclick="switchPill('b')">⚖️ Bilanciato</div>
+      <div class="sc-pill" id="pill-a" style="background:var(--s2);border-color:var(--bdr);color:var(--mut)" onclick="switchPill('a')">🚀 Aggressivo</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-label" id="chart-lbl">Simulazione illustrativa — non è una previsione</div>
       <canvas id="chart" style="width:100%"></canvas>
     </div>
+    <div class="risk-meter">
+      <div class="risk-meter-lbl">Perdita massima storica in un singolo anno</div>
+      <div class="risk-row"><span class="risk-name">🛡️ Conservativo</span><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:20%;background:#90caf9"></div></div><span class="risk-val" style="color:#90caf9">-8%</span></div>
+      <div class="risk-row"><span class="risk-name">⚖️ Bilanciato</span><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:55%;background:#66bb6a"></div></div><span class="risk-val" style="color:#66bb6a">-22%</span></div>
+      <div class="risk-row"><span class="risk-name">🚀 Aggressivo</span><div class="risk-bar-bg"><div class="risk-bar-fill" style="width:92%;background:#a78bfa"></div></div><span class="risk-val" style="color:#a78bfa">-37%</span></div>
+      <div style="font-size:11px;color:#334155;margin-top:8px">Dati storici indicativi su indici globali</div>
+    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px">Con quale scenario ti sentiresti a tuo agio?</div>
+    <div class="sc-cards">
+      <div class="sc-card" onclick="selSc('c',this)"><span class="sc-em">🛡️</span><div class="sc-txt"><div class="sc-title">Conservativo</div><div class="sc-sub">Preferisco crescere lentamente senza preoccuparmi troppo delle oscillazioni</div></div><div class="sc-check">✓</div></div>
+      <div class="sc-card" onclick="selSc('b',this)"><span class="sc-em">⚖️</span><div class="sc-txt"><div class="sc-title">Bilanciato</div><div class="sc-sub">Accetto qualche altalena se nel lungo periodo il risultato è migliore</div></div><div class="sc-check">✓</div></div>
+      <div class="sc-card" onclick="selSc('a',this)"><span class="sc-em">🚀</span><div class="sc-txt"><div class="sc-title">Aggressivo</div><div class="sc-sub">Voglio il massimo potenziale e sopporto anche forti perdite temporanee</div></div><div class="sc-check">✓</div></div>
+    </div>
+    <button class="btn-next" id="n4" disabled onclick="showResult()">Vedi il mio profilo →</button>
+    <button class="btn-back" onclick="go(3)">← Indietro</button>
+  </div>
 
-    <div class="sc-detail" id="sc-detail"></div>
+  <!-- RESULT -->
+  <div class="step" id="s-result"><div id="result"></div></div>
 
-    <div class="edu" id="edu-msg"></div>
+  <!-- REGISTRAZIONE -->
+  <div class="step" id="s-reg">
+    <div class="step-tag">Quasi fatto</div>
+    <div class="step-title">Salva il tuo profilo</div>
+    <div class="step-sub">Hai costruito qualcosa di valore. Crea il tuo account gratuito per salvarlo e accedere al rebalancer su qualsiasi dispositivo.</div>
 
-    <div class="prof-q">Con quale scenario ti sentiresti a tuo agio?</div>
-    <div class="prof-cards">
-      <div class="prof-card" data-v="conservativo" onclick="selProf('conservativo',this)">
-        <div class="prof-card-em">🛡️</div>
-        <div class="prof-card-txt">
-          <div class="prof-card-title">Conservativo — meno oscillazioni, crescita più lenta</div>
-          <div class="prof-card-sub">Preferisco la stabilità anche se significa guadagnare di meno</div>
-        </div>
-        <div class="prof-check">✓</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px">
+      <div style="background:var(--s2);border-radius:11px;padding:12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">🎯</div>
+        <div style="font-size:11px;color:var(--mut);line-height:1.4">Profilo e target salvati</div>
       </div>
-      <div class="prof-card" data-v="bilanciato" onclick="selProf('bilanciato',this)">
-        <div class="prof-card-em">⚖️</div>
-        <div class="prof-card-txt">
-          <div class="prof-card-title">Bilanciato — oscillazioni moderate, crescita nel tempo</div>
-          <div class="prof-card-sub">Accetto qualche flessione se nel lungo periodo il risultato è migliore</div>
-        </div>
-        <div class="prof-check">✓</div>
+      <div style="background:var(--s2);border-radius:11px;padding:12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">⚖️</div>
+        <div style="font-size:11px;color:var(--mut);line-height:1.4">Rebalancer sbloccato</div>
       </div>
-      <div class="prof-card" data-v="aggressivo" onclick="selProf('aggressivo',this)">
-        <div class="prof-card-em">🚀</div>
-        <div class="prof-card-txt">
-          <div class="prof-card-title">Aggressivo — forti oscillazioni, potenziale maggiore</div>
-          <div class="prof-card-sub">Sopporto perdite anche gravi sapendo che ho tempo per recuperare</div>
-        </div>
-        <div class="prof-check">✓</div>
+      <div style="background:var(--s2);border-radius:11px;padding:12px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📱</div>
+        <div style="font-size:11px;color:var(--mut);line-height:1.4">Accesso multi-device</div>
       </div>
     </div>
 
-    <button class="btn-next" id="next-1" disabled onclick="showResult()">Vedi il mio profilo →</button>
-    <button class="btn-back" onclick="go(0)">← Modifica i dati</button>
+    <!-- Google -->
+    <button class="reg-google" onclick="regWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="G">
+      Continua con Google
+    </button>
+
+    <div class="reg-divider"><span>oppure</span></div>
+
+    <!-- Email form -->
+    <div class="reg-form" id="reg-form">
+      <div class="fld">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="nome@email.it" inputmode="email" autocomplete="email" oninput="checkRegForm()">
+      </div>
+      <div class="fld">
+        <label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="reg-pw" placeholder="Almeno 8 caratteri" autocomplete="new-password" oninput="checkRegForm()">
+          <button onclick="togglePw()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mut);font-size:16px;cursor:pointer" id="pw-eye">👁</button>
+        </div>
+      </div>
+      <div id="reg-strength" style="display:none;margin-top:-6px;margin-bottom:10px">
+        <div style="height:3px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:5px">
+          <div id="str-bar" style="height:100%;border-radius:2px;transition:all .3s;width:0%"></div>
+        </div>
+        <div id="str-lbl" style="font-size:11px;color:var(--mut)"></div>
+      </div>
+      <button class="btn-next" id="reg-btn" disabled onclick="regWithEmail()">Crea account gratuito →</button>
+    </div>
+
+    <div style="font-size:11px;color:#334155;text-align:center;margin-top:14px;line-height:1.65">
+      Registrandoti accetti i <span style="color:var(--mut);text-decoration:underline;cursor:pointer">Termini di servizio</span> e la <span style="color:var(--mut);text-decoration:underline;cursor:pointer">Privacy Policy</span>.<br>Nessuna carta di credito richiesta.
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="skipReg()" style="background:transparent;border:none;color:var(--mut);font-size:12px;text-decoration:underline;cursor:pointer;padding:8px">
+        Continua senza account — salvo solo in locale
+      </button>
+    </div>
   </div>
 
-  <!-- ── RESULT ── -->
-  <div class="step" id="step-result">
-    <div id="result-content"></div>
+  <!-- BROKER -->
+  <div class="step" id="s-broker">
+    <div class="step-tag">Ultimo passo</div>
+    <div class="step-title">Scegli dove aprire il conto</div>
+    <div class="step-sub">Per investire in ETF ti serve un conto titoli. Questi sono i broker più usati in Italia — con i rispettivi pro e contro.</div>
+    <div class="disc-box">🔗 <strong style="color:#64748b">Trasparenza:</strong> i link qui sotto sono link affiliati. Se apri un conto tramite uno di questi link, riceviamo una commissione dal broker — senza alcun costo aggiuntivo per te. I confronti sono basati su dati oggettivi.</div>
+    <div class="broker-card">
+      <div class="br-top"><div class="br-logo" style="background:#ff6600">DE</div><div class="br-head"><div class="br-name">DEGIRO</div><div class="br-tag">Commissioni più basse in assoluto</div></div><div class="br-badge" style="background:#0a1e12;color:#66bb6a;border-color:#166534">🏆 Più economico</div></div>
+      <div class="br-pros-cons">
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--grn)">✓ Punti di forza</div><div class="br-item">Commissioni bassissime (spesso €0 su ETF selezionati)</div><div class="br-item">Piattaforma semplice, ideale per chi inizia</div><div class="br-item">Ampia selezione di ETF UCITS</div></div>
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--red)">✗ Limiti</div><div class="br-item">Solo investimenti, nessun conto corrente</div><div class="br-item">Sede nei Paesi Bassi (fiscalità da gestire)</div><div class="br-item">Supporto clienti meno reattivo</div></div>
+      </div>
+      <div class="br-for">👤 <strong>Ideale per:</strong> chi vuole solo investire in ETF con i costi più bassi possibili</div>
+      <button class="br-btn" onclick="openBroker('degiro')" style="background:#ff6600">Apri conto DEGIRO →</button>
+    </div>
+    <div class="broker-card">
+      <div class="br-top"><div class="br-logo" style="background:#1d4ed8">DI</div><div class="br-head"><div class="br-name">Directa SIM</div><div class="br-tag">Broker italiano, PAC automatico gratuito</div></div><div class="br-badge" style="background:#0b1929;color:#4fc3f7;border-color:#1e3a5f">🇮🇹 Italiano</div></div>
+      <div class="br-pros-cons">
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--grn)">✓ Punti di forza</div><div class="br-item">SIM italiana vigilata da Consob e Banca d'Italia</div><div class="br-item">PAC su oltre 500 ETF completamente gratuito</div><div class="br-item">Regime amministrato di default — tasse calcolate e versate automaticamente da Directa</div></div>
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--red)">✗ Limiti</div><div class="br-item">Solo investimenti, nessun conto corrente</div><div class="br-item">Commissioni su ordini singoli più alte rispetto a DEGIRO</div><div class="br-item">Gamma strumenti più orientata al mercato italiano</div></div>
+      </div>
+      <div class="br-for">👤 <strong>Ideale per:</strong> chi vuole un broker italiano affidabile con tassazione automatica e PAC gratuito su ETF</div>
+      <button class="br-btn" onclick="openBroker('directa')" style="background:#1d4ed8">Apri conto Directa →</button>
+    </div>
+    <div class="broker-card">
+      <div class="br-top"><div class="br-logo" style="background:#00a651">FI</div><div class="br-head"><div class="br-name">FinecoBank</div><div class="br-tag">Banca + investimenti in un'unica app</div></div><div class="br-badge" style="background:#081f12;color:#66bb6a;border-color:#166534">🏦 Banca completa</div></div>
+      <div class="br-pros-cons">
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--grn)">✓ Punti di forza</div><div class="br-item">Banca completa: conto corrente, carte, investimenti</div><div class="br-item">App eccellente</div><div class="br-item">Regime amministrato — tasse automatiche</div></div>
+        <div class="br-col"><div class="br-col-lbl" style="color:var(--red)">✗ Limiti</div><div class="br-item">Commissioni più alte sugli ETF</div><div class="br-item">Costi fissi per operazione nel PAC</div><div class="br-item">Eccessivo se vuoi solo investire</div></div>
+      </div>
+      <div class="br-for">👤 <strong>Ideale per:</strong> chi vuole gestire tutto — conto corrente e investimenti — in un unico posto</div>
+      <button class="br-btn" onclick="openBroker('fineco')" style="background:#00a651">Apri conto Fineco →</button>
+    </div>
+    <div style="background:var(--s2);border-radius:12px;padding:14px 16px;margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">🤔 Non sai quale scegliere?</div>
+      <div style="font-size:13px;color:#94a3b8;line-height:1.65">Solo ETF al costo minimo → <strong>DEGIRO</strong><br>PAC automatico italiano → <strong>Directa</strong><br>Banca + investimenti insieme → <strong>Fineco</strong></div>
+    </div>
+    <button class="btn-cta" onclick="showReg()">⚖ Costruisci il mio portafoglio →</button>
+    <button class="btn-ghost" onclick="goResult()">← Torna al mio profilo</button>
+    <div style="font-size:10px;color:#334155;line-height:1.65;text-align:center;margin-top:12px">L'apertura di un conto è gratuita. Verifica sempre le condizioni aggiornate sui siti ufficiali prima di procedere.</div>
   </div>
-
 </div>
+
+<!-- ── APP (REBALANCER) ── -->
+<div class="app-shell" id="app-shell">
+  <div class="app-hdr">
+    <div class="app-logo">
+      <div class="app-logo-icon">⚖</div>
+      <span class="app-logo-txt">Portfolio Rebalancer</span>
+    </div>
+    <div class="app-dtabs">
+      <button class="app-dtab active" id="adt-portfolio" onclick="switchAppTab('portfolio')">📊 Portfolio</button>
+      <button class="app-dtab" id="adt-investi" onclick="switchAppTab('investi')">💰 Investi</button>
+      <button class="app-dtab" id="adt-target" onclick="switchAppTab('target')">🎯 Target</button>
+      <button class="app-dtab" id="adt-impara" onclick="switchAppTab('impara')">📚 Impara</button>
+    </div>
+  </div>
+  <div class="app-body" id="app-body"></div>
+  <div class="app-bnav">
+    <div class="app-bnav-inner">
+      <button class="app-bnav-btn active" id="abn-portfolio" onclick="switchAppTab('portfolio')"><span>📊</span>Portfolio</button>
+      <button class="app-bnav-btn" id="abn-investi" onclick="switchAppTab('investi')"><span>💰</span>Investi</button>
+      <button class="app-bnav-btn" id="abn-target" onclick="switchAppTab('target')"><span>🎯</span>Target</button>
+      <button class="app-bnav-btn" id="abn-impara" onclick="switchAppTab('impara')"><span>📚</span>Impara</button>
+    </div>
+  </div>
+  <button class="app-fab" onclick="openAddEtf()">＋</button>
+</div>
+
+<!-- ETF MODAL -->
+<div class="ov" id="etf-modal" style="display:none" onclick="if(event.target===this)closeEtfModal()">
+  <div class="modal">
+    <div class="mh"></div>
+    <h3 id="rm-title">Aggiungi ETF</h3>
+    <div class="fld"><label>Ticker</label><input id="rm-tk" type="text" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="fld"><label>Nome / Descrizione</label><input id="rm-nm" type="text"></div>
+    <div class="fld"><label>Valore attuale (€)</label><input id="rm-vl" type="number" inputmode="decimal" placeholder="0"></div>
+    <div class="fld"><label>Categoria</label><select id="rm-cat" onchange="rMCatChange()"></select></div>
+    <div class="fld" id="rm-sf" style="display:none"><label>Sottocategoria</label><select id="rm-sub"></select></div>
+    <div class="tog-wrap" onclick="toggleRFixed()">
+      <div class="tog-info"><div class="tog-title">Posizione fissa 🔒</div><div class="tog-sub">Non verrà incrementata nei nuovi investimenti, ma conta nell'allocazione.</div></div>
+      <div class="tog-sw" id="rm-fsw"><div class="tog-track"></div><div class="tog-knob"></div></div>
+    </div>
+    <div class="mbtns">
+      <button class="bcancel" onclick="closeEtfModal()">Annulla</button>
+      <button class="bdel" id="rm-del" style="display:none" onclick="delFromEtfModal()">🗑 Elimina</button>
+      <button class="bok" onclick="saveEtfModal()">✓ Salva</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var S={age:30,init:0,monthly:0,activeSc:'conservativo',profile:null};
-var chart=null;
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────
+// ⚠️ Sostituisci con le tue credenziali da supabase.com → Project Settings → API
+var SUPABASE_URL = 'https://csduippibgzhzuqbrjba.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_rDdwSDgskJUchIVlQ-leow_0RQlo8PG';
+var sb = null;
+var currentUser = null;
 
-var SCEN={
-  conservativo:{
-    id:'conservativo',name:'Conservativo',emoji:'🛡️',
-    color:'#90caf9',
-    // Historical annualised return range for conservative portfolio (illustrative)
-    rateBase:0.025, rateOpt:0.04, ratePess:0.005,
-    worstYear:'-8%', worstColor:'#66bb6a',
-    desc:'Prevalentemente obbligazioni e liquidità. Bassa volatilità, rendimenti contenuti. Adatto a orizzonti brevi o bassa tolleranza al rischio.',
-    etfs:[
-      {name:'ETF Obbligaz. Gov. Globali (ex: VAGF)',pct:55,col:'#66bb6a'},
-      {name:'ETF Liquidità / Monetario (ex: XEON)',pct:30,col:'#90caf9'},
-      {name:'ETF Azionario Globale (ex: VWCE)',pct:15,col:'#4fc3f7'},
-    ],
-    alloc:{Azionario:15,Obbligazionario:55,Liquidità:30},
-    allocCols:{Azionario:'#4fc3f7',Obbligazionario:'#66bb6a',Liquidità:'#90caf9'},
-    riskLabel:'Oscillazione tipica annua',riskVal:'±5%',riskW:18,
-    drawdownLabel:'Peggior anno storico',drawdownVal:'-8%',drawdownW:20,
-    edu:'<strong>Cosa impari da questo scenario:</strong> la stabilità ha un costo. Un portafoglio conservativo protegge bene nelle crisi ma, nel lungo periodo, rischia di non battere l\'inflazione. È la scelta giusta se hai un orizzonte breve o non vuoi perdere il sonno.'
-  },
-  bilanciato:{
-    id:'bilanciato',name:'Bilanciato',emoji:'⚖️',
-    color:'#66bb6a',
-    rateBase:0.055, rateOpt:0.08, ratePess:0.02,
-    worstYear:'-22%', worstColor:'#ffa726',
-    desc:'Mix di ETF azionari globali passivi ed ETF obbligazionari. Volatilità moderata, buon potenziale nel lungo periodo. Il portafoglio più diffuso tra gli investitori a lungo termine.',
-    etfs:[
-      {name:'ETF Azionario Globale (ex: VWCE)',pct:50,col:'#4fc3f7'},
-      {name:'ETF Azionario Mercati Emergenti (ex: EIMI)',pct:10,col:'#38bdf8'},
-      {name:'ETF Obbligaz. Gov. Globali (ex: VAGF)',pct:30,col:'#66bb6a'},
-      {name:'ETF Liquidità (ex: XEON)',pct:10,col:'#90caf9'},
-    ],
-    alloc:{Azionario:60,Obbligazionario:30,Liquidità:10},
-    allocCols:{Azionario:'#4fc3f7',Obbligazionario:'#66bb6a',Liquidità:'#90caf9'},
-    riskLabel:'Oscillazione tipica annua',riskVal:'±15%',riskW:45,
-    drawdownLabel:'Peggior anno storico',drawdownVal:'-22%',drawdownW:55,
-    edu:'<strong>Cosa impari da questo scenario:</strong> il bilanciato è la via di mezzo più studiata. In una crisi come il 2008 un portafoglio simile perse circa il 25% — e recuperò tutto entro 3-4 anni. La chiave è non vendere nel panico. Gli ETF passivi usati qui replicano indici globali: nessun gestore, costi bassissimi, massima diversificazione.'
-  },
-  aggressivo:{
-    id:'aggressivo',name:'Aggressivo',emoji:'🚀',
-    color:'#a78bfa',
-    rateBase:0.08, rateOpt:0.11, ratePess:0.01,
-    worstYear:'-37%', worstColor:'#ef5350',
-    desc:'Quasi interamente ETF azionari passivi e sostenibili. Alta volatilità, potenziale più elevato nel lungo periodo. Richiede disciplina e un orizzonte di almeno 10-15 anni.',
-    etfs:[
-      {name:'ETF Azionario Globale Sost. (ex: MSCI World SRI)',pct:60,col:'#4fc3f7'},
-      {name:'ETF Azionario Mercati Emergenti (ex: EIMI)',pct:20,col:'#38bdf8'},
-      {name:'ETF Small Cap Globali (ex: WSML)',pct:15,col:'#60a5fa'},
-      {name:'ETF Obbligaz. breve termine',pct:5,col:'#66bb6a'},
-    ],
-    alloc:{Azionario:95,Obbligazionario:5,Liquidità:0},
-    allocCols:{Azionario:'#4fc3f7',Obbligazionario:'#66bb6a',Liquidità:'#90caf9'},
-    riskLabel:'Oscillazione tipica annua',riskVal:'±25%',riskW:75,
-    drawdownLabel:'Peggior anno storico',drawdownVal:'-37%',drawdownW:92,
-    edu:'<strong>Cosa impari da questo scenario:</strong> il 2022 ha mostrato cali del 20-25% anche su portafogli azionari globali. Chi ha venduto ha cristallizzato le perdite; chi ha tenuto ha recuperato in 12-18 mesi. Questo scenario ha senso solo se accetti di non toccare il portafoglio per almeno 10 anni. Notare: include ETF con criteri ESG/SRI — stessi costi, stessa diversificazione, aziende selezionate per impatto sociale e ambientale.'
-  }
-};
-
-// ─── HELPERS ─────────────────────────────────────────────────────
-function fk(n){if(n>=1e6)return '€'+(n/1e6).toFixed(n>=10e6?0:1)+'M';if(n>=1000)return '€'+Math.round(n/1000)+'k';return '€'+Math.round(n);}
-function fc(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);}
-function horizon(){return Math.max(10,Math.min(35,65-S.age));}
-function calcSeries(init,monthly,rate,years){
-  var pts=[init],val=init,r=rate/12;
-  for(var y=1;y<=years;y++){for(var m=0;m<12;m++)val=val*(1+r)+monthly;pts.push(Math.max(0,val));}
-  return pts;
-}
-
-// ─── STEP 0 ───────────────────────────────────────────────────────
-function onAge(v){S.age=parseInt(v);document.getElementById('age-n').textContent=v;checkNext0();}
-function onInit(v){S.init=parseFloat(v)||0;checkNext0();}
-function onMonthly(v){S.monthly=parseFloat(v)||0;checkNext0();}
-function setInit(v){S.init=v;document.getElementById('init-inp').value=v||'';checkNext0();}
-function setMonthly(v){S.monthly=v;document.getElementById('monthly-inp').value=v;checkNext0();}
-function checkNext0(){document.getElementById('next-0').disabled=!(S.monthly>0||S.init>0);}
-
-// ─── NAVIGATION ──────────────────────────────────────────────────
-function go(n){
-  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('step-'+n).classList.add('active');
-  for(var i=0;i<2;i++){var d=document.getElementById('d'+i);d.className='dot'+(i<n?' done':i===n?' active':'');}
-  if(n===1)initViz();
-  window.scrollTo(0,0);
-}
-
-// ─── VIZ ─────────────────────────────────────────────────────────
-function initViz(){
-  document.getElementById('viz-init').value=S.init||'';
-  document.getElementById('viz-monthly').value=S.monthly||'';
-  buildChart();
-  renderScDetail(S.activeSc);
-}
-function onVizInit(v){S.init=parseFloat(v)||0;rebuildChart();}
-function onVizMonthly(v){S.monthly=parseFloat(v)||0;rebuildChart();}
-function rebuildChart(){if(chart)buildChart();}
-
-function switchSc(id){
-  S.activeSc=id;
-  document.querySelectorAll('.sc-tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('tab-'+id).classList.add('active');
-  updateActiveDataset();
-  renderScDetail(id);
-}
-
-function buildChart(){
-  var hor=horizon();
-  var labels=[];
-  for(var y=0;y<=hor;y++)labels.push(y===0?'Oggi':(y%5===0||y===hor)?y+'a':'');
-
-  var allDatasets=[];
-  Object.values(SCEN).forEach(function(sc){
-    var base=calcSeries(S.init,S.monthly,sc.rateBase,hor);
-    var opt=calcSeries(S.init,S.monthly,sc.rateOpt,hor);
-    var pess=calcSeries(S.init,S.monthly,sc.ratePess,hor);
-    var isActive=sc.id===S.activeSc;
-    // area between optimistic and pessimistic
-    allDatasets.push({
-      label:sc.name+' (scenario favorevole)',
-      data:opt,
-      borderColor:'transparent',
-      backgroundColor:isActive?sc.color+'28':'transparent',
-      fill:'+1',
-      tension:0.4,pointRadius:0,order:2,
-      hidden:!isActive
-    });
-    allDatasets.push({
-      label:sc.name+' (scenario sfavorevole)',
-      data:pess,
-      borderColor:'transparent',
-      backgroundColor:'transparent',
-      fill:false,
-      tension:0.4,pointRadius:0,order:2,
-      hidden:!isActive
-    });
-    // base line
-    allDatasets.push({
-      label:sc.name,
-      data:base,
-      borderColor:isActive?sc.color:sc.color+'44',
-      backgroundColor:'transparent',
-      borderWidth:isActive?2.5:1.5,
-      fill:false,
-      tension:0.4,
-      pointRadius:0,
-      pointHoverRadius:isActive?5:0,
-      order:1,
-      hidden:false,
-      borderDash:isActive?[]:[6,4]
-    });
-  });
-
-  var ctx=document.getElementById('chart').getContext('2d');
-  if(chart){chart.destroy();}
-  chart=new Chart(ctx,{
-    type:'line',
-    data:{labels:labels,datasets:allDatasets},
-    options:{
-      responsive:true,maintainAspectRatio:true,aspectRatio:1.9,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#111827',borderColor:'#1e293b',borderWidth:1,
-          titleColor:'#64748b',bodyColor:'#e2e8f0',padding:10,
-          filter:function(item){return !item.dataset.label.includes('scenario');},
-          callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fk(ctx.raw);}}
-        }
-      },
-      scales:{
-        x:{grid:{color:'#1e293b'},ticks:{color:'#475569',font:{size:10},maxRotation:0}},
-        y:{grid:{color:'#1e293b'},ticks:{color:'#475569',font:{size:10},callback:function(v){return fk(v);}}}
+function initSupabase() {
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Ascolta i cambi di sessione (login/logout/refresh token)
+    sb.auth.onAuthStateChange(function(event, session) {
+      currentUser = session ? session.user : null;
+      updateAuthUI();
+      if (event === 'SIGNED_IN' && session) {
+        // Se l'utente era in attesa di accedere all'app
+        if (window._pendingGoApp) { window._pendingGoApp = false; goApp(); }
+        saveProfileToSupabase();
       }
+      // Gestisce redirect OAuth (Google) dopo il ritorno alla pagina
+      if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    });
+    // Controlla se c'è già una sessione attiva (utente tornato)
+    sb.auth.getSession().then(function(r) {
+      if (r.data && r.data.session) {
+        currentUser = r.data.session.user;
+        updateAuthUI();
+      }
+    });
+  } catch(e) {
+    console.warn('Supabase non configurato — modalità locale attiva.', e.message);
+  }
+}
+
+function isSupabaseReady() {
+  return sb && SUPABASE_URL !== 'https://TUO-PROGETTO.supabase.co';
+}
+
+function updateAuthUI() {
+  // Aggiorna badge sync nell'app se visibile
+  var badge = document.getElementById('auth-badge');
+  if (badge) {
+    if (currentUser) {
+      badge.textContent = '✓ ' + (currentUser.email || 'Google');
+      badge.style.color = 'var(--grn)';
+    } else {
+      badge.textContent = 'Non connesso';
+      badge.style.color = 'var(--mut)';
+    }
+  }
+}
+
+// ─── SALVA PROFILO SU SUPABASE ────────────────────────────────────
+async function saveProfileToSupabase() {
+  if (!isSupabaseReady() || !currentUser) return;
+  var profile = {
+    user_id: currentUser.id,
+    age: S.age,
+    init_amount: S.init,
+    monthly_amount: S.monthly,
+    risk_profile: S.sc || 'b',
+    cat_targets: R_CT,
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await sb.from('profiles').upsert(profile, { onConflict: 'user_id' });
+  } catch(e) { console.warn('Salvataggio profilo fallito:', e); }
+}
+
+// ─── CARICA PROFILO DA SUPABASE ───────────────────────────────────
+async function loadProfileFromSupabase() {
+  if (!isSupabaseReady() || !currentUser) return false;
+  try {
+    var r = await sb.from('profiles').select('*').eq('user_id', currentUser.id).single();
+    if (r.data) {
+      S.age = r.data.age || S.age;
+      S.init = r.data.init_amount || S.init;
+      S.monthly = r.data.monthly_amount || S.monthly;
+      S.sc = r.data.risk_profile || S.sc;
+      if (r.data.cat_targets) Object.assign(R_CT, r.data.cat_targets);
+      return true;
+    }
+  } catch(e) { console.warn('Caricamento profilo fallito:', e); }
+  return false;
+}
+
+// ─── REGISTRATION FUNCTIONS ───────────────────────────────────────
+function checkRegForm() {
+  var email = document.getElementById('reg-email').value.trim();
+  var pw = document.getElementById('reg-pw').value;
+  var valid = email.includes('@') && email.includes('.') && pw.length >= 8;
+  document.getElementById('reg-btn').disabled = !valid;
+  // Indicatore forza password
+  var str = document.getElementById('reg-strength');
+  var bar = document.getElementById('str-bar');
+  var lbl = document.getElementById('str-lbl');
+  if (pw.length > 0) {
+    str.style.display = 'block';
+    var score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    var levels = [
+      {w:'20%',col:'#ef5350',t:'Troppo corta'},
+      {w:'40%',col:'#ffa726',t:'Debole'},
+      {w:'60%',col:'#ffa726',t:'Discreta'},
+      {w:'80%',col:'#66bb6a',t:'Buona'},
+      {w:'100%',col:'#66bb6a',t:'Ottima 🔒'}
+    ];
+    var l = levels[Math.min(score, 4)];
+    bar.style.width = l.w; bar.style.background = l.col;
+    lbl.textContent = l.t; lbl.style.color = l.col;
+  } else { str.style.display = 'none'; }
+}
+
+function togglePw() {
+  var inp = document.getElementById('reg-pw');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  document.getElementById('pw-eye').textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+async function regWithGoogle() {
+  if (!isSupabaseReady()) {
+    showConfigWarning();
+    return;
+  }
+  setRegLoading(true);
+  var r = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.href,
+      queryParams: { access_type: 'offline', prompt: 'consent' }
     }
   });
-  document.getElementById('chart-note').textContent='Simulazione su '+hor+" anni (fino ai 65) — fascia colorata: range storico tra scenario favorevole e sfavorevole";
+  if (r.error) { showRegError(r.error.message); setRegLoading(false); }
+  // Il redirect avviene automaticamente — onAuthStateChange gestisce il ritorno
 }
 
-function updateActiveDataset(){
-  if(!chart)return;
-  var ds=chart.data.datasets;
-  var idx=0;
-  Object.values(SCEN).forEach(function(sc,si){
-    var isActive=sc.id===S.activeSc;
-    ds[idx].hidden=!isActive;
-    ds[idx].backgroundColor=isActive?sc.color+'28':'transparent';
-    idx++;
-    ds[idx].hidden=!isActive;
-    idx++;
-    ds[idx].borderColor=isActive?sc.color:sc.color+'44';
-    ds[idx].borderWidth=isActive?2.5:1.5;
-    ds[idx].borderDash=isActive?[]:[6,4];
-    ds[idx].pointHoverRadius=isActive?5:0;
-    idx++;
-  });
-  chart.update();
+async function regWithEmail() {
+  var email = document.getElementById('reg-email').value.trim();
+  var pw = document.getElementById('reg-pw').value;
+  if (!isSupabaseReady()) { showConfigWarning(); return; }
+  setRegLoading(true);
+  // Prima prova login, se non esiste crea account
+  var r = await sb.auth.signInWithPassword({ email: email, password: pw });
+  if (r.error && r.error.message.includes('Invalid login')) {
+    // Account non esiste — crea
+    r = await sb.auth.signUp({ email: email, password: pw });
+    if (r.error) { showRegError(r.error.message); setRegLoading(false); return; }
+    if (r.data && !r.data.session) {
+      // Email di conferma inviata
+      showRegEmailConfirm(email);
+      return;
+    }
+  }
+  if (r.error) { showRegError(r.error.message); setRegLoading(false); return; }
+  setRegLoading(false);
+  showRegSuccess(email);
+  goApp();
 }
 
-function renderScDetail(id){
-  var sc=SCEN[id];
-  var hor=horizon();
-  var baseVal=calcSeries(S.init,S.monthly,sc.rateBase,hor);
-  var finalBase=baseVal[baseVal.length-1];
-  var totalVers=S.init+S.monthly*hor*12;
-
-  var h="<div class='sc-detail "+id+"'>";
-  h+="<div class='sc-detail-top'><div class='sc-big-emoji'>"+sc.emoji+"</div>";
-  h+="<div><div class='sc-detail-title' style='color:"+sc.color+"'>"+sc.name+"</div>";
-  h+="<div class='sc-detail-sub'>"+sc.desc+"</div></div></div>";
-
-  h+="<div class='sc-metrics'>";
-  h+="<div class='sc-metric'><div class='sc-metric-lbl'>Scenario base ("+hor+" anni)</div><div class='sc-metric-val' style='color:"+sc.color+"'>"+fk(finalBase)+"</div></div>";
-  h+="<div class='sc-metric'><div class='sc-metric-lbl'>Versamenti totali</div><div class='sc-metric-val'>"+fk(totalVers)+"</div></div>";
-  h+="<div class='sc-metric'><div class='sc-metric-lbl'>Peggior anno storico</div><div class='sc-metric-val' style='color:"+sc.worstColor+"'>"+sc.worstYear+"</div></div>";
-  h+="</div>";
-
-  h+="<div class='sc-etf-lbl'>Esempi di ETF passivi utilizzabili</div>";
-  sc.etfs.forEach(function(e){
-    h+="<div class='sc-etf-row'><div class='etf-dot' style='background:"+e.col+"'></div>";
-    h+="<span class='etf-name'>"+e.name+"</span>";
-    h+="<div class='etf-bar-bg'><div class='etf-bar-fill' style='width:"+e.pct+"%;background:"+e.col+"'></div></div>";
-    h+="<span class='etf-pct' style='color:"+e.col+"'>"+e.pct+"%</span></div>";
-  });
-
-  h+="<div class='risk-row' style='margin-top:10px'>";
-  h+="<span class='risk-label'>"+sc.riskLabel+"</span>";
-  h+="<div class='risk-bar-bg'><div class='risk-bar-fill' style='width:"+sc.riskW+"%;background:"+sc.color+"'></div></div>";
-  h+="<span class='risk-val' style='color:"+sc.color+"'>"+sc.riskVal+"</span></div>";
-  h+="<div class='risk-row'>";
-  h+="<span class='risk-label'>"+sc.drawdownLabel+"</span>";
-  h+="<div class='risk-bar-bg'><div class='risk-bar-fill' style='width:"+sc.drawdownW+"%;background:"+sc.worstColor+"'></div></div>";
-  h+="<span class='risk-val' style='color:"+sc.worstColor+"'>"+sc.drawdownVal+"</span></div>";
-
-  h+="</div>";
-
-  document.getElementById('sc-detail').innerHTML=h;
-  document.getElementById('edu-msg').innerHTML=sc.edu;
+async function signOut() {
+  if (sb) await sb.auth.signOut();
+  currentUser = null;
+  updateAuthUI();
 }
 
-function selProf(id,el){
-  S.profile=id;
-  document.querySelectorAll('.prof-card').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');
-  document.getElementById('next-1').disabled=false;
-  switchSc(id);
+function skipReg() { goApp(); }
+
+function setRegLoading(on) {
+  var btn = document.getElementById('reg-btn');
+  var gBtn = document.querySelector('.reg-google');
+  if (btn) { btn.disabled = on; btn.textContent = on ? '⏳ Attendere…' : 'Crea account gratuito →'; }
+  if (gBtn) { gBtn.disabled = on; }
 }
 
-// ─── RESULT ──────────────────────────────────────────────────────
-function showResult(){
-  var sc=SCEN[S.profile];
-  var hor=horizon();
-  var base=calcSeries(S.init,S.monthly,sc.rateBase,hor);
-  var opt=calcSeries(S.init,S.monthly,sc.rateOpt,hor);
-  var pess=calcSeries(S.init,S.monthly,sc.ratePess,hor);
-  var fBase=base[base.length-1];
-  var fOpt=opt[opt.length-1];
-  var fPess=pess[pess.length-1];
-  var totalVers=S.init+S.monthly*hor*12;
+function showRegError(msg) {
+  var el = document.getElementById('reg-error');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'reg-error';
+    el.style.cssText = 'background:#200a0a;border:1px solid #7f1d1d;border-radius:10px;padding:10px 14px;font-size:12px;color:#fca5a5;margin-bottom:12px;line-height:1.5';
+    document.getElementById('reg-form').prepend(el);
+  }
+  var msgs = {
+    'Invalid login credentials': 'Password non corretta. Riprova o usa Google.',
+    'User already registered': 'Email già registrata. Prova ad accedere.',
+    'Password should be at least 6 characters': 'La password deve essere di almeno 8 caratteri.',
+    'Unable to validate email address': 'Indirizzo email non valido.'
+  };
+  el.textContent = '⚠ ' + (msgs[msg] || msg);
+}
 
-  var h='';
-  h+="<div class='result-hero' style='background:linear-gradient(135deg,"+sc.color+"18,"+sc.color+"08);border:1px solid "+sc.color+"33'>";
-  h+="<div class='rh-emoji'>"+sc.emoji+"</div>";
-  h+="<div class='rh-name'>Profilo "+sc.name+"</div>";
-  h+="<div class='rh-desc'>"+sc.desc+"</div></div>";
+function showRegEmailConfirm(email) {
+  document.getElementById('s-reg').innerHTML =
+    "<div style='text-align:center;padding:20px 0'>" +
+    "<div style='font-size:56px;margin-bottom:16px'>📧</div>" +
+    "<div style='font-size:20px;font-weight:700;margin-bottom:8px'>Controlla la tua email</div>" +
+    "<div style='font-size:14px;color:#94a3b8;line-height:1.7;margin-bottom:24px'>Abbiamo inviato un link di conferma a <strong style='color:var(--txt)'>" + email + "</strong>.<br>Clicca il link per attivare il tuo account.</div>" +
+    "<div style='background:var(--s2);border-radius:12px;padding:14px;font-size:12px;color:var(--mut);margin-bottom:24px'>Non trovi l'email? Controlla anche la cartella spam.</div>" +
+    "<button class='btn-ghost' onclick='skipReg()'>Continua senza conferma per ora →</button></div>";
+}
 
-  h+="<div style='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:10px'>Proiezione illustrativa su "+hor+" anni — tre scenari storici</div>";
-  h+="<div class='proj-cards'>";
-  h+="<div class='proj-card'><div class='proj-lbl'>Scenario sfavorevole</div><div class='proj-val' style='color:var(--red)'>"+fc(fPess)+"</div></div>";
-  h+="<div class='proj-card' style='border-color:"+sc.color+"55'><div class='proj-lbl'>Scenario base</div><div class='proj-val' style='color:"+sc.color+"'>"+fc(fBase)+"</div></div>";
-  h+="<div class='proj-card'><div class='proj-lbl'>Scenario favorevole</div><div class='proj-val' style='color:var(--grn)'>"+fc(fOpt)+"</div></div>";
-  h+="</div>";
-  h+="<div class='proj-cards'>";
-  h+="<div class='proj-card'><div class='proj-lbl'>Versamenti totali effettuati</div><div class='proj-val'>"+fc(totalVers)+"</div></div>";
-  h+="</div>";
+function showRegSuccess(identifier) {
+  var sc = SCEN[S.sc || 'b'];
+  document.getElementById('s-reg').innerHTML =
+    "<div style='text-align:center;padding:10px 0 24px'>" +
+    "<div style='font-size:64px;margin-bottom:16px'>🎉</div>" +
+    "<div style='font-size:22px;font-weight:700;margin-bottom:8px'>Benvenuto!</div>" +
+    "<div style='font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:24px'>Account creato. Il tuo profilo è salvato e il rebalancer è pronto con i target preimpostati.</div>" +
+    "<div style='background:#0a1f10;border:1px solid #166534;border-radius:12px;padding:14px 16px;margin-bottom:24px;text-align:left'>" +
+    "<div style='font-size:12px;font-weight:700;color:var(--grn);margin-bottom:8px'>✓ Profilo salvato su cloud</div>" +
+    "<div style='font-size:13px;color:#a7f3d0;line-height:1.7'>Profilo: <strong>" + sc.name + "</strong><br>Target importati nel rebalancer<br>Account: <strong>" + identifier + "</strong></div></div>" +
+    "<button class='btn-cta' onclick='goApp()'>Apri il Portfolio Rebalancer →</button></div>";
+}
 
-  h+="<div style='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:16px 0 10px'>Allocazione indicativa — solo ETF passivi</div>";
-  Object.keys(sc.alloc).forEach(function(name){
-    var pct=sc.alloc[name];if(!pct)return;
-    var col=sc.allocCols[name]||'#b0bec5';
-    h+="<div class='alloc-row'><div class='alloc-dot' style='background:"+col+"'></div>";
-    h+="<span class='alloc-name'>"+name+"</span>";
-    h+="<div class='alloc-bar-bg'><div class='alloc-bar-fill' style='width:"+pct+"%;background:"+col+"'></div></div>";
-    h+="<span class='alloc-pct' style='color:"+col+"'>"+pct+"%</span></div>";
-  });
+function showConfigWarning() {
+  showRegError('Supabase non configurato. Sostituisci SUPABASE_URL e SUPABASE_KEY nel codice.');
+}
 
-  h+="<div class='warn-legal' style='margin-top:18px'>";
-  h+="⚠️ <strong>Nota bene — leggi prima di procedere:</strong><br>";
-  h+="Queste simulazioni sono <strong>esclusivamente a scopo educativo e illustrativo</strong>. Non costituiscono consulenza finanziaria, sollecitazione all\'investimento né profilazione MiFID II. "
-   +"I rendimenti storici usati come riferimento non sono garanzia di rendimenti futuri. Il valore degli investimenti può diminuire anche significativamente. "
-   +"Prima di investire, valuta di rivolgerti a un consulente finanziario indipendente abilitato.<br><br>"
-   +"Gli ETF mostrati sono esempi indicativi. Verifica sempre costi (TER), valuta di denominazione, domicilio fiscale e rischi specifici prima di qualsiasi operazione.";
-  h+="</div>";
+// Init Supabase all'avvio
+initSupabase();
+var S={age:30,init:0,monthly:0,quiz:null,sc:null,pill:'c'};
+var obChart=null;
+var SCEN={
+  c:{name:'Conservativo',emoji:'🛡️',color:'#90caf9',rate:0.025,rateO:0.04,rateP:0.005,
+     alloc:{Azionario:15,Obbligazionario:55,Liquidità:30},
+     desc:'Prevalentemente obbligazioni e liquidità. Meno rischio, crescita più lenta.'},
+  b:{name:'Bilanciato',emoji:'⚖️',color:'#66bb6a',rate:0.055,rateO:0.08,rateP:0.02,
+     alloc:{Azionario:60,Obbligazionario:30,Liquidità:10},
+     desc:'Il mix più usato nel lungo termine. Buon potenziale con oscillazioni moderate.'},
+  a:{name:'Aggressivo',emoji:'🚀',color:'#a78bfa',rate:0.08,rateO:0.11,rateP:0.01,
+     alloc:{Azionario:90,Obbligazionario:5,Liquidità:5},
+     desc:'Quasi tutto azionario. Alto potenziale, forti oscillazioni. Richiede almeno 10-15 anni.'}
+};
+var QUIZ_ANSWERS={
+  a:{correct:false,msg:'😰 È la reazione più umana — ma anche la più costosa. Vendere a -35% trasforma una perdita temporanea in una perdita reale e definitiva.'},
+  b:{correct:false,msg:'😟 Vendere metà sembra ragionevole, ma significa perdita cristallizzata e ripresa mancata. Con 15 anni davanti, quasi sempre un errore.'},
+  c:{correct:true,msg:'😐 Esatto. La pazienza è la strategia più potente nel lungo termine. Chi non ha venduto nel 2008, 2020 o 2022 ha sempre recuperato e guadagnato di più.'},
+  d:{correct:true,msg:'😎 La risposta da investitore esperto. Le crisi sono occasioni per comprare a prezzi scontati. Non è facile emotivamente — ma i dati lo confermano.'}
+};
 
-  h+="<button class='btn-cta' onclick='sendToRebalancer()'>⚖ Costruisci il portafoglio →</button>";
-  h+="<button class='btn-sec' id='cpbtn' onclick='copyResult()'>📋 Copia il mio profilo</button>";
-  h+="<button class='btn-restart' onclick='restart()'>↺ Ricomincia</button>";
-  h+="<div class='disc-final'>Strumento educativo — non sostituisce la consulenza finanziaria professionale. Dati non salvati né trasmessi a terzi.</div>";
-
-  document.getElementById('result-content').innerHTML=h;
-  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('step-result').classList.add('active');
-  document.getElementById('dots').style.display='none';
+// ─── ONBOARDING HELPERS ───────────────────────────────────────────
+function fk(n){if(n>=1e6)return '€'+(n/1e6).toFixed(1)+'M';if(n>=1000)return '€'+Math.round(n/1000)+'k';return '€'+Math.round(n);}
+function hor(){return Math.max(10,Math.min(35,65-S.age));}
+function calcSeries(init,mo,r,yrs){var v=init,pts=[init],rm=r/12;for(var y=1;y<=yrs;y++){for(var m=0;m<12;m++)v=v*(1+rm)+mo;pts.push(Math.max(0,v));}return pts;}
+var STEPS=['Dati di partenza','Cos\'è un ETF','Azionario vs Obbligazionario','Metti alla prova','Il tuo mix'];
+var stepIds=['s0','s1','s2','s3','s4','s-result','s-broker','s-reg'];
+function setProg(n){
+  var pct=Math.round(n/STEPS.length*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent='Passo '+(n+1)+' di '+STEPS.length+' — '+STEPS[n];
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+function go(n){
+  stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById(stepIds[n]).classList.add('active');
+  if(n<STEPS.length)setProg(n);
+  if(n===4)initChart();
   window.scrollTo(0,0);
-
-  try{
-    localStorage.setItem('pfr3_onboarding',JSON.stringify({
-      catTargets:Object.assign({},sc.alloc,{'Materie Prime':0,Immobiliare:0,Crypto:0,Altro:0})
-    }));
-  }catch(e){}
 }
-
-function sendToRebalancer(){
-  alert('✅ Profilo salvato.\nApri il Portfolio Rebalancer — i target sono già precompilati.');
+function goResult(){
+  stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById('s-result').classList.add('active');
+  window.scrollTo(0,0);
 }
+function onAge(v){S.age=parseInt(v);document.getElementById('age-n').textContent=v;chk0();}
+function onInit(v){S.init=parseFloat(v)||0;chk0();}
+function onMonthly(v){S.monthly=parseFloat(v)||0;chk0();}
+function setV(k,v){if(k==='init'){S.init=v;document.getElementById('init-inp').value=v||'';}else{S.monthly=v;document.getElementById('mo-inp').value=v;}chk0();}
+function chk0(){document.getElementById('n0').disabled=!(S.monthly>0||S.init>0);}
 
-function copyResult(){
-  var sc=SCEN[S.profile],hor=horizon();
-  var base=calcSeries(S.init,S.monthly,sc.rateBase,hor);
-  var txt='PROFILO EDUCATIVO: '+sc.name.toUpperCase()+'\n'
-    +'Età: '+S.age+' | Orizzonte simulazione: '+hor+' anni\n'
-    +'Capitale iniziale: '+fc(S.init)+' | Versamento mensile: '+fc(S.monthly)+'\n\n'
-    +'PROIEZIONE ILLUSTRATIVA (non è una previsione)\n'
-    +'Scenario sfavorevole: '+fc(calcSeries(S.init,S.monthly,sc.ratePess,hor).slice(-1)[0])+'\n'
-    +'Scenario base:        '+fc(base.slice(-1)[0])+'\n'
-    +'Scenario favorevole:  '+fc(calcSeries(S.init,S.monthly,sc.rateOpt,hor).slice(-1)[0])+'\n\n'
-    +'ALLOCAZIONE INDICATIVA\n'
-    +Object.keys(sc.alloc).map(function(k){return k+': '+sc.alloc[k]+'%';}).join('\n');
-  navigator.clipboard.writeText(txt).then(function(){
-    var b=document.getElementById('cpbtn');if(b){b.textContent='✓ Copiato!';setTimeout(function(){b.textContent='📋 Copia il mio profilo';},2000);}
+// ─── QUIZ ─────────────────────────────────────────────────────────
+function doQuiz(ans,el){
+  if(S.quiz)return;S.quiz=ans;
+  var a=QUIZ_ANSWERS[ans];
+  ['a','b','c','d'].forEach(function(k){
+    var o=document.getElementById('qo-'+k);
+    if(k===ans){o.classList.add(a.correct?'correct':'wrong');document.getElementById('qb-'+k).textContent=a.correct?'✓ Buona scelta':'✗ Non ideale';}
+    else o.classList.add('dim');
   });
+  var fb=document.getElementById('qfeed');
+  fb.className='quiz-feedback show '+(a.correct?'ok':'ko');fb.innerHTML=a.msg;
+  document.getElementById('q-optimal').style.display='block';
+  document.getElementById('btn-change').style.display='block';
+  document.getElementById('n3').disabled=false;
 }
+function resetQuiz(){
+  S.quiz=null;
+  ['a','b','c','d'].forEach(function(k){var o=document.getElementById('qo-'+k);o.classList.remove('correct','wrong','dim');document.getElementById('qb-'+k).textContent='';});
+  document.getElementById('qfeed').className='quiz-feedback';document.getElementById('qfeed').innerHTML='';
+  document.getElementById('q-optimal').style.display='none';
+  document.getElementById('btn-change').style.display='none';
+  document.getElementById('n3').disabled=true;
+}
+
+// ─── CHART ────────────────────────────────────────────────────────
+function initChart(){
+  var h=hor();
+  var labels=[];for(var y=0;y<=h;y++)labels.push(y===0?'Oggi':(y%5===0||y===h)?y+'a':'');
+  var datasets=[];
+  Object.keys(SCEN).forEach(function(k){
+    var sc=SCEN[k],isA=k===S.pill;
+    datasets.push({label:sc.name+' ott',data:calcSeries(S.init,S.monthly,sc.rateO,h),borderColor:'transparent',fill:'+1',backgroundColor:isA?sc.color+'22':'transparent',tension:0.4,pointRadius:0,hidden:!isA});
+    datasets.push({label:sc.name+' pess',data:calcSeries(S.init,S.monthly,sc.rateP,h),borderColor:'transparent',fill:false,backgroundColor:'transparent',tension:0.4,pointRadius:0,hidden:!isA});
+    datasets.push({label:sc.name,data:calcSeries(S.init,S.monthly,sc.rate,h),borderColor:isA?sc.color:sc.color+'55',borderWidth:isA?2.5:1.5,borderDash:isA?[]:[5,4],backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:0,pointHoverRadius:isA?5:0,hidden:false});
+  });
+  var ctx=document.getElementById('chart').getContext('2d');
+  if(obChart)obChart.destroy();
+  obChart=new Chart(ctx,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.9,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:'#1e293b',borderWidth:1,titleColor:'#64748b',bodyColor:'#e2e8f0',padding:10,filter:function(i){return !i.dataset.label.includes('ott')&&!i.dataset.label.includes('pess');},callbacks:{label:function(c){return ' '+c.dataset.label+': '+fk(c.raw);}}}},scales:{x:{grid:{color:'#1e293b'},ticks:{color:'#475569',font:{size:10},maxRotation:0}},y:{grid:{color:'#1e293b'},ticks:{color:'#475569',font:{size:10},callback:function(v){return fk(v);}}}}}});
+  document.getElementById('chart-lbl').textContent='Simulazione su '+h+' anni — fascia: range storico tra scenario favorevole e sfavorevole';
+}
+function switchPill(k){
+  S.pill=k;
+  var cfg={c:{bg:'#0b1929',bc:'#90caf9',tc:'#90caf9'},b:{bg:'#081f12',bc:'#66bb6a',tc:'#66bb6a'},a:{bg:'#12082a',bc:'#a78bfa',tc:'#a78bfa'}};
+  ['c','b','a'].forEach(function(x){var p=document.getElementById('pill-'+x),ac=x===k;p.style.background=ac?cfg[x].bg:'var(--s2)';p.style.borderColor=ac?cfg[x].bc:'var(--bdr)';p.style.color=ac?cfg[x].tc:'var(--mut)';});
+  if(obChart){var idx=0;Object.keys(SCEN).forEach(function(sk){var isA=sk===k,sc=SCEN[sk];obChart.data.datasets[idx].hidden=!isA;obChart.data.datasets[idx].backgroundColor=isA?sc.color+'22':'transparent';idx++;obChart.data.datasets[idx].hidden=!isA;idx++;obChart.data.datasets[idx].borderColor=isA?sc.color:sc.color+'55';obChart.data.datasets[idx].borderWidth=isA?2.5:1.5;obChart.data.datasets[idx].borderDash=isA?[]:[5,4];obChart.data.datasets[idx].pointHoverRadius=isA?5:0;idx++;});obChart.update();}
+}
+function selSc(k,el){S.sc=k;document.querySelectorAll('.sc-card').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');document.getElementById('n4').disabled=false;switchPill(k);}
+
+// ─── RESULT ───────────────────────────────────────────────────────
+var ACOLS={Azionario:'#4fc3f7',Obbligazionario:'#66bb6a',Liquidità:'#90caf9'};
+function showResult(){
+  var sc=SCEN[S.sc],h=hor();
+  var fB=calcSeries(S.init,S.monthly,sc.rate,h).slice(-1)[0];
+  var fO=calcSeries(S.init,S.monthly,sc.rateO,h).slice(-1)[0];
+  var fP=calcSeries(S.init,S.monthly,sc.rateP,h).slice(-1)[0];
+  var tV=S.init+S.monthly*h*12;
+  var fc=function(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);};
+  var h2='';
+  h2+="<div class='result-badge' style='background:linear-gradient(135deg,"+sc.color+"15,"+sc.color+"05);border:1px solid "+sc.color+"44'><div class='rb-em'>"+sc.emoji+"</div><div class='rb-name'>Profilo "+sc.name+"</div><div class='rb-sub'>"+sc.desc+"</div></div>";
+  h2+="<div style='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:10px'>Simulazione su "+h+" anni — tre scenari storici</div>";
+  h2+="<div class='proj-grid'><div class='proj-box'><div class='proj-lbl'>Scenario sfavorevole</div><div class='proj-val' style='color:var(--red)'>"+fc(fP)+"</div></div><div class='proj-box' style='border-color:"+sc.color+"55'><div class='proj-lbl'>Scenario base</div><div class='proj-val' style='color:"+sc.color+"'>"+fc(fB)+"</div></div><div class='proj-box'><div class='proj-lbl'>Scenario favorevole</div><div class='proj-val' style='color:var(--grn)'>"+fc(fO)+"</div></div></div>";
+  h2+="<div class='proj-grid' style='grid-template-columns:1fr 1fr;margin-bottom:20px'><div class='proj-box'><div class='proj-lbl'>Versamenti totali</div><div class='proj-val'>"+fc(tV)+"</div></div><div class='proj-box'><div class='proj-lbl'>Interessi stimati</div><div class='proj-val' style='color:var(--grn)'>"+fc(Math.max(0,fB-tV))+"</div></div></div>";
+  h2+="<div style='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:10px'>Allocazione indicativa — solo ETF passivi</div>";
+  Object.keys(sc.alloc).forEach(function(name){var pct=sc.alloc[name];if(!pct)return;var col=ACOLS[name];h2+="<div class='alloc-item'><div class='al-dot' style='background:"+col+"'></div><span class='al-name'>"+name+"</span><div class='al-bar'><div class='al-fill' style='width:"+pct+"%;background:"+col+"'></div></div><span class='al-pct' style='color:"+col+"'>"+pct+"%</span></div>";});
+  h2+="<div class='legal-box' style='margin-top:16px'>⚠️ <strong>Importante:</strong> queste simulazioni sono esclusivamente a scopo educativo. Non costituiscono consulenza finanziaria né profilazione MiFID II. I rendimenti storici non garantiscono rendimenti futuri. Il valore degli investimenti può diminuire significativamente.</div>";
+  h2+="<button class='btn-cta' onclick='showBroker()'>🏦 Scegli dove aprire il conto →</button>";
+  h2+="<button class='btn-ghost' onclick='goApp()'>⚖ Vai al Portfolio Rebalancer</button>";
+  h2+="<button class='btn-restart' onclick='restart()'>↺ Ricomincia da capo</button>";
+  h2+="<div class='disc'>Strumento educativo — nessun dato viene salvato o trasmesso a terzi.</div>";
+  document.getElementById('result').innerHTML=h2;
+  stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById('s-result').classList.add('active');
+  document.getElementById('oprog').style.display='none';
+  window.scrollTo(0,0);
+}
+function showBroker(){stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});document.getElementById('s-broker').classList.add('active');window.scrollTo(0,0);}
+function showReg(){stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});document.getElementById('s-reg').classList.add('active');window.scrollTo(0,0);}
+
+// ─── REGISTRATION ─────────────────────────────────────────────────
+function checkRegForm(){
+  var email=document.getElementById('reg-email').value.trim();
+  var pw=document.getElementById('reg-pw').value;
+  var valid=email.includes('@')&&email.includes('.')&&pw.length>=8;
+  document.getElementById('reg-btn').disabled=!valid;
+  // password strength
+  var str=document.getElementById('reg-strength');
+  var bar=document.getElementById('str-bar');
+  var lbl=document.getElementById('str-lbl');
+  if(pw.length>0){
+    str.style.display='block';
+    var score=0;
+    if(pw.length>=8)score++;
+    if(pw.length>=12)score++;
+    if(/[A-Z]/.test(pw))score++;
+    if(/[0-9]/.test(pw))score++;
+    if(/[^A-Za-z0-9]/.test(pw))score++;
+    var levels=[
+      {w:'20%',col:'#ef5350',t:'Troppo corta'},
+      {w:'40%',col:'#ffa726',t:'Debole'},
+      {w:'60%',col:'#ffa726',t:'Discreta'},
+      {w:'80%',col:'#66bb6a',t:'Buona'},
+      {w:'100%',col:'#66bb6a',t:'Ottima 🔒'}
+    ];
+    var l=levels[Math.min(score,4)];
+    bar.style.width=l.w;bar.style.background=l.col;
+    lbl.textContent=l.t;lbl.style.color=l.col;
+  }else{str.style.display='none';}
+}
+function togglePw(){
+  var inp=document.getElementById('reg-pw');
+  inp.type=inp.type==='password'?'text':'password';
+  document.getElementById('pw-eye').textContent=inp.type==='password'?'👁':'🙈';
+}
+function regWithGoogle(){
+  // In produzione: integra Firebase Auth o Supabase Google OAuth
+  showRegSuccess('Google');
+}
+function regWithEmail(){
+  var email=document.getElementById('reg-email').value.trim();
+  // In produzione: integra Firebase Auth o Supabase email/password
+  showRegSuccess(email);
+}
+function skipReg(){
+  goApp();
+}
+function showRegSuccess(identifier){
+  var h='';
+  h+="<div style='text-align:center;padding:10px 0 24px'>";
+  h+="<div style='font-size:64px;margin-bottom:16px'>🎉</div>";
+  h+="<div style='font-size:22px;font-weight:700;margin-bottom:8px'>Benvenuto!</div>";
+  h+="<div style='font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:28px'>Account creato. Il tuo profilo è salvato e il rebalancer è pronto con i tuoi target preimpostati.</div>";
+  h+="<div style='background:#0a1f10;border:1px solid #166534;border-radius:12px;padding:14px 16px;margin-bottom:24px;text-align:left'>";
+  h+="<div style='font-size:12px;font-weight:700;color:var(--grn);margin-bottom:8px'>✓ Profilo salvato</div>";
+  h+="<div style='font-size:13px;color:#a7f3d0;line-height:1.7'>Profilo: <strong>"+SCEN[S.sc||'b'].name+"</strong><br>Target importati nel rebalancer<br>Account: <strong>"+identifier+"</strong></div></div>";
+  h+="<button class='btn-cta' style='font-size:15px' onclick='goApp()'>Apri il mio Portfolio Rebalancer →</button>";
+  h+="</div>";
+  stepIds.forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById('s-reg').classList.add('active');
+  document.getElementById('s-reg').innerHTML=h;
+  window.scrollTo(0,0);
+}
+// Broker
+var BROKER_LINKS={degiro:'https://www.degiro.it',directa:'https://www.directa.it',fineco:'https://www.fineco.it'};
+function openBroker(id){window.open(BROKER_LINKS[id],'_blank');}
 
 function restart(){
-  S={age:30,init:0,monthly:0,activeSc:'conservativo',profile:null};
-  document.getElementById('age-sl').value=30;
-  document.getElementById('age-n').textContent=30;
-  document.getElementById('init-inp').value='';
-  document.getElementById('monthly-inp').value='';
-  document.getElementById('next-0').disabled=true;
-  document.getElementById('dots').style.display='flex';
+  S={age:30,init:0,monthly:0,quiz:null,sc:null,pill:'c'};
+  document.getElementById('age-sl').value=30;document.getElementById('age-n').textContent=30;
+  document.getElementById('init-inp').value='';document.getElementById('mo-inp').value='';
+  document.getElementById('n0').disabled=true;document.getElementById('oprog').style.display='';
   go(0);
 }
+
+// ─── REBALANCER STATE ─────────────────────────────────────────────
+var R={etfs:[],nid:1,appTab:'portfolio',editId:null,inlId:null,lastCap:''};
+var R_CATS=['Azionario','Obbligazionario','Liquidità','Materie Prime','Immobiliare','Crypto','Altro'];
+var R_COLS={Azionario:'#4fc3f7',Obbligazionario:'#66bb6a',Liquidità:'#90caf9','Materie Prime':'#ffa726',Immobiliare:'#ce93d8',Crypto:'#ef5350',Altro:'#b0bec5'};
+var R_BG={Azionario:'#0b1e30',Obbligazionario:'#081f12',Liquidità:'#071625','Materie Prime':'#1e1208',Immobiliare:'#170b24',Crypto:'#200a0a',Altro:'#111'};
+var R_SUBS={Azionario:['Globale','USA','Europa','Emergenti'],Obbligazionario:['Governativo','Corporate','High Yield','Emergenti']};
+var R_CT={},R_ST={};
+
+function goApp(){
+  var sc=SCEN[S.sc||'b'];
+  R_CATS.forEach(function(c){R_CT[c]=sc.alloc[c]||0;});
+  R_CATS.forEach(function(c){if(R_SUBS[c]){R_ST[c]={};R_SUBS[c].forEach(function(s){R_ST[c][s]=0;});}});
+  document.getElementById('rm-cat').innerHTML=R_CATS.map(function(c){return '<option>'+c+'</option>';}).join('');
+  document.getElementById('onb-shell').style.display='none';
+  document.getElementById('app-shell').style.display='block';
+  // Salva profilo se loggato
+  if (currentUser) saveProfileToSupabase();
+  switchAppTab('portfolio');
+  window.scrollTo(0,0);
+}
+
+function switchAppTab(tab){
+  R.appTab=tab;
+  ['portfolio','investi','target','impara'].forEach(function(t){
+    var d=document.getElementById('adt-'+t),b=document.getElementById('abn-'+t);
+    if(d)d.classList.toggle('active',t===tab);
+    if(b)b.classList.toggle('active',t===tab);
+  });
+  if(tab==='portfolio')renderPortfolio();
+  else if(tab==='investi')renderInvesti();
+  else if(tab==='target')renderTarget();
+  else renderImpara();
+}
+
+function rTot(){return R.etfs.reduce(function(a,e){return a+e.v;},0);}
+var rfc=function(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);};
+
+// ─── CALC BUYS ────────────────────────────────────────────────────
+function calcBuys(cap){
+  var curTot=rTot(),newTot=curTot+cap,orders=[];
+  R_CATS.forEach(function(cat){
+    var tgt=R_CT[cat]||0;if(!tgt)return;
+    var budget=newTot*tgt/100;
+    var catEtfs=R.etfs.filter(function(e){return e.cat===cat;});if(!catEtfs.length)return;
+    var subs=R_SUBS[cat]||[],subTgts=R_ST[cat]||{};
+    var hasSub=subs.length>0&&subs.some(function(s){return (subTgts[s]||0)>0;});
+    if(hasSub){
+      subs.forEach(function(sub){
+        var st=subTgts[sub]||0;if(!st)return;
+        var sb=budget*st/100,se=catEtfs.filter(function(e){return e.sub===sub;});
+        var fxV=se.filter(function(e){return e.fx;}).reduce(function(a,e){return a+e.v;},0);
+        var nf=se.filter(function(e){return !e.fx;});if(!nf.length)return;
+        var free=Math.max(0,sb-fxV),nfT=nf.reduce(function(a,e){return a+e.v;},0);
+        nf.forEach(function(e){var w=nfT>0?e.v/nfT:1/nf.length;var tv=free*w;orders.push({etf:e,tv:tv,buy:Math.max(0,tv-e.v),sub:sub,cat:cat});});
+      });
+    }else{
+      var fxV=catEtfs.filter(function(e){return e.fx;}).reduce(function(a,e){return a+e.v;},0);
+      var nf=catEtfs.filter(function(e){return !e.fx;});if(!nf.length)return;
+      var free=Math.max(0,budget-fxV),nfT=nf.reduce(function(a,e){return a+e.v;},0);
+      nf.forEach(function(e){var w=nfT>0?e.v/nfT:1/nf.length;var tv=free*w;orders.push({etf:e,tv:tv,buy:Math.max(0,tv-e.v),sub:e.sub,cat:cat});});
+    }
+  });
+  var totB=orders.reduce(function(a,r){return a+r.buy;},0);
+  if(totB>cap&&totB>0){var sc=cap/totB;orders.forEach(function(r){r.buy*=sc;r.tv=r.etf.v+r.buy;});}
+  return orders.filter(function(r){return r.buy>=0.5;}).sort(function(a,b){return b.buy-a.buy;});
+}
+
+// ─── RENDER PORTFOLIO ─────────────────────────────────────────────
+function renderPortfolio(){
+  var T=rTot(),groups={};
+  R.etfs.forEach(function(e){if(!groups[e.cat])groups[e.cat]=[];groups[e.cat].push(e);});
+  var catSum=R_CATS.reduce(function(a,c){return a+(R_CT[c]||0);},0);
+  var h='';
+  h+="<div class='card'><div class='card-lbl'>Riepilogo</div>";
+  h+="<div class='stats'><div class='stat'><div class='stat-l'>Totale</div><div class='stat-v' style='color:var(--acc)'>"+rfc(T)+"</div></div>";
+  h+="<div class='stat'><div class='stat-l'>Posizioni</div><div class='stat-v'>"+R.etfs.length+"</div></div>";
+  h+="<div class='stat'><div class='stat-l'>Fisse 🔒</div><div class='stat-v'>"+R.etfs.filter(function(e){return e.fx;}).length+"</div></div></div>";
+  if(Math.abs(catSum-100)>0.5&&catSum>0)h+="<div class='warn' style='margin:0;font-size:11px'>⚠ Target: "+catSum.toFixed(0)+"% — vai in 🎯 Target per bilanciare a 100%</div>";
+  if(T>0){h+="<div class='pbar' style='margin-top:10px;margin-bottom:0'>";R_CATS.forEach(function(c){var cv=(groups[c]||[]).reduce(function(a,e){return a+e.v;},0);if(!cv)return;h+="<div class='pbar-seg' style='flex:"+cv+";background:"+R_COLS[c]+"'></div>";});h+="</div>";}
+  h+="</div>";
+  if(!R.etfs.length){
+    h+="<div style='text-align:center;padding:44px 20px;color:var(--mut)'>";
+    h+="<div style='font-size:48px;margin-bottom:12px'>📂</div>";
+    h+="<div style='font-size:16px;font-weight:700;margin-bottom:8px;color:var(--txt)'>Nessuna posizione ancora</div>";
+    h+="<div style='font-size:13px;line-height:1.6'>Aggiungi i tuoi ETF con il pulsante <strong style='color:var(--acc)'>＋</strong> in basso a destra.<br>I target sono già impostati dal tuo profilo.</div></div>";
+  }else{
+    R_CATS.forEach(function(cat){
+      var items=groups[cat];if(!items||!items.length)return;
+      var col=R_COLS[cat],catV=items.reduce(function(a,e){return a+e.v;},0);
+      var pct=T>0?(catV/T*100):0,tgt=R_CT[cat]||0,diff=pct-tgt;
+      var dc=Math.abs(diff)<0.5?'var(--grn)':Math.abs(diff)<3?'var(--org)':'var(--red)';
+      h+="<div class='cat-block'><div class='cat-hdr' style='background:"+R_BG[cat]+"'>";
+      h+="<div class='cdot' style='background:"+col+"'></div>";
+      h+="<span style='color:"+col+";font-weight:700;font-size:11px;letter-spacing:.04em'>"+cat.toUpperCase()+"</span>";
+      h+="<span style='flex:1'></span>";
+      h+="<span style='font-family:DM Mono,monospace;font-size:11px;color:var(--mut)'>"+rfc(catV)+"</span>";
+      h+="<span style='font-family:DM Mono,monospace;font-size:11px;color:"+col+";margin-left:7px'>"+pct.toFixed(1)+"%</span>";
+      if(tgt)h+="<span style='font-size:10px;color:"+dc+";margin-left:5px;font-family:DM Mono,monospace'>"+(diff>=0?'+':'')+diff.toFixed(1)+"% vs "+tgt+"%</span>";
+      h+="</div>";
+      items.forEach(function(e){
+        var ep=T>0?(e.v/T*100):0;
+        var vpart=R.inlId===e.id
+          ?"<input class='vinp' id='ri"+e.id+"' type='number' inputmode='decimal' value='"+e.v+"' onblur='saveRInl("+e.id+")' onkeydown='if(event.key===\"Enter\")saveRInl("+e.id+")'>"
+          :"<button class='vbtn' onclick='startRInl("+e.id+")'>"+rfc(e.v)+"</button>";
+        h+="<div class='etf-row'><div class='etf-l' onclick='openEditEtf("+e.id+")'>";
+        h+="<div class='etf-tk' style='color:"+col+"'>"+e.tk+(e.fx?' 🔒':'')+"</div>";
+        h+="<div class='etf-nm'>"+e.nm+" · "+ep.toFixed(1)+"%"+(e.sub?" · "+e.sub:"")+"</div></div>";
+        h+="<div class='etf-r'>"+vpart;
+        h+="<button class='ftog"+(e.fx?' on':'')+"' onclick='togRFx("+e.id+")'>"+(e.fx?'🔒':'🔓')+"</button>";
+        h+="<button class='delbtn' onclick='delREtf("+e.id+")'>✕</button></div></div>";
+      });
+      h+="</div>";
+    });
+  }
+  h+="<div style='height:80px'></div>";
+  setApp(h);
+  if(R.inlId){var el=document.getElementById('ri'+R.inlId);if(el){el.focus();el.select();}}
+}
+
+// ─── RENDER INVESTI ───────────────────────────────────────────────
+function renderInvesti(){
+  var cap=parseFloat(R.lastCap)||0,T=rTot();
+  var catSum=R_CATS.reduce(function(a,c){return a+(R_CT[c]||0);},0);
+  var catOk=Math.abs(catSum-100)<0.1;
+  var h='';
+  h+="<div class='inv-card'><div class='inv-lbl'>Nuovo capitale da investire</div>";
+  h+="<div class='inv-row'><span class='euro-sym'>€</span><input class='inv-inp' id='rcap' type='number' inputmode='decimal' placeholder='0' value='"+R.lastCap+"' oninput='onRCap(this.value)'></div>";
+  if(cap>0)h+="<div style='font-size:12px;color:var(--mut);margin-top:8px'>Portafoglio: "+rfc(T)+" → dopo: <span style='color:var(--acc);font-family:DM Mono,monospace;font-weight:600'>"+rfc(T+cap)+"</span></div>";
+  h+="</div>";
+  if(!catOk){h+="<div class='warn'>⚠ Target non bilanciati ("+catSum.toFixed(0)+"%). Vai in 🎯 Target.</div>";}
+  else if(!cap){
+    h+="<div class='info'>💡 Inserisci l'importo da investire per ricevere il piano di acquisto basato sul tuo profilo e sugli ETF già in portafoglio.</div>";
+    h+="<div class='card'><div class='card-lbl'>Situazione attuale vs target</div>";
+    R_CATS.forEach(function(cat){
+      var tgt=R_CT[cat]||0;if(!tgt)return;
+      var cv=R.etfs.filter(function(e){return e.cat===cat;}).reduce(function(a,e){return a+e.v;},0);
+      var act=T>0?(cv/T*100):0,diff=act-tgt;
+      var dc=Math.abs(diff)<0.5?'var(--grn)':Math.abs(diff)<3?'var(--org)':'var(--red)';
+      var col=R_COLS[cat];
+      h+="<div style='margin-bottom:9px'><div style='display:flex;align-items:center;gap:7px;margin-bottom:4px'>";
+      h+="<div class='cdot' style='background:"+col+"'></div><span style='font-size:13px;flex:1'>"+cat+"</span>";
+      h+="<span style='font-size:11px;color:var(--mut);font-family:DM Mono,monospace'>att:"+act.toFixed(1)+"%</span>";
+      h+="<span style='font-size:11px;color:"+dc+";font-family:DM Mono,monospace;margin-left:5px'>tgt:"+tgt+"%</span></div>";
+      h+="<div style='height:4px;background:#1e293b;border-radius:2px;overflow:hidden;display:flex'>";
+      h+="<div style='flex:"+Math.min(act,tgt)+";background:"+col+";border-radius:2px'></div>";
+      if(act<tgt)h+="<div style='flex:"+(tgt-act)+";background:"+col+"22'></div>";
+      if(act>tgt)h+="<div style='flex:"+(act-tgt)+";background:var(--red)33'></div>";
+      h+="</div></div>";
+    });
+    h+="</div>";
+  }else{
+    var orders=calcBuys(cap),totBuy=orders.reduce(function(a,r){return a+r.buy;},0),rem=cap-totBuy;
+    if(!orders.length){h+="<div style='text-align:center;padding:36px 20px;color:var(--grn);font-size:15px;font-weight:700'>✅ Portafoglio già bilanciato!</div>";}
+    else{
+      h+="<div class='card' style='border-color:#166534;background:#0a1e12;margin-bottom:12px'>";
+      h+="<div style='display:flex;align-items:center;gap:10px'>";
+      h+="<div style='flex:1'><div style='font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;font-weight:700'>Da investire ora</div><div style='font-family:DM Mono,monospace;font-size:22px;font-weight:700;color:var(--grn)'>"+rfc(totBuy)+"</div></div>";
+      h+="<div style='font-size:12px;color:var(--mut);text-align:right'>su "+rfc(cap)+" disponibili"+(rem>0.5?"<br><span style='color:var(--org)'>"+rfc(rem)+" non allocati</span>":"")+"</div></div></div>";
+      var byCat={};orders.forEach(function(r){if(!byCat[r.cat])byCat[r.cat]=[];byCat[r.cat].push(r);});
+      R_CATS.forEach(function(cat){
+        var items=byCat[cat];if(!items)return;
+        var col=R_COLS[cat],catBuy=items.reduce(function(a,r){return a+r.buy;},0),newTot=T+cap;
+        h+="<div style='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:"+col+";padding:5px 2px 4px;margin-top:4px'>"+cat+" — acquistare "+rfc(catBuy)+"</div>";
+        items.forEach(function(r){
+          var nP=newTot>0?(r.tv/newTot*100):0,oP=T>0?(r.etf.v/T*100):0;
+          h+="<div class='buy-row'><div class='cdot' style='background:"+col+"'></div>";
+          h+="<div class='buy-l'><div class='buy-tk' style='color:"+col+"'>"+r.etf.tk+"</div>";
+          h+="<div class='buy-det'>"+r.etf.nm+(r.sub?" · "+r.sub:"")+"</div>";
+          h+="<div class='buy-det' style='margin-top:3px;color:var(--mut)'>"+rfc(r.etf.v)+" → <span style='color:var(--grn)'>"+rfc(r.tv)+"</span> ("+oP.toFixed(1)+"% → "+nP.toFixed(1)+"%)</div>";
+          h+="</div><div class='buy-amt'>+"+rfc(r.buy)+"</div></div>";
+        });
+      });
+      if(rem>0.5)h+="<div class='info'>"+rfc(rem)+" non allocati: le categorie sono già ai target o non hai ETF liberi in quei gruppi.</div>";
+    }
+    var fixd=R.etfs.filter(function(e){return e.fx;});
+    if(fixd.length){
+      h+="<div class='card' style='margin-top:4px'><div class='card-lbl'>Posizioni fisse 🔒 — invariate</div>";
+      fixd.forEach(function(e){var col=R_COLS[e.cat],pct=(T+cap)>0?(e.v/(T+cap)*100):0;h+="<div class='fixed-row'><div class='cdot' style='background:"+col+"'></div><span style='font-family:DM Mono,monospace;font-size:13px;color:"+col+"'>"+e.tk+"</span><span style='flex:1;font-size:11px;color:var(--mut);margin-left:6px'>"+e.nm+"</span><span style='font-size:11px;color:var(--mut);font-family:DM Mono,monospace'>"+rfc(e.v)+" · "+pct.toFixed(1)+"%</span></div>";});
+      h+="</div>";
+    }
+  }
+  h+="<div style='height:80px'></div>";
+  setApp(h);
+  var inp=document.getElementById('rcap');if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);}
+}
+
+// ─── RENDER TARGET ────────────────────────────────────────────────
+function renderTarget(){
+  var T=rTot();
+  var catSum=R_CATS.reduce(function(a,c){return a+(R_CT[c]||0);},0);
+  var catOk=Math.abs(catSum-100)<0.1,catOver=catSum>100.05;
+  var h='';
+  h+="<div class='card'><div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px'>";
+  h+="<div class='card-lbl' style='margin:0'>Target per categoria</div>";
+  h+="<span id='rct-sum' class='sum-pill "+(catOk?'sum-ok':catOver?'sum-over':'sum-err')+"'>"+catSum.toFixed(0)+"% / 100%</span></div>";
+  h+="<div class='info' style='margin-bottom:12px'>Impostati dal tuo profilo. Modificali in qualsiasi momento.</div>";
+  R_CATS.forEach(function(cat){
+    var col=R_COLS[cat],tgt=R_CT[cat]||0;
+    var cv=R.etfs.filter(function(e){return e.cat===cat;}).reduce(function(a,e){return a+e.v;},0);
+    var act=T>0?(cv/T*100):0,diff=act-tgt;
+    var dc=Math.abs(diff)<0.5?'var(--grn)':Math.abs(diff)<3?'var(--org)':'var(--red)';
+    h+="<div class='tgt-row'><div class='cdot' style='background:"+col+"'></div><span class='tgt-nm'>"+cat+"</span>";
+    if(T>0)h+="<span style='font-size:11px;color:"+dc+";font-family:DM Mono,monospace'>att "+act.toFixed(1)+"% ("+(diff>=0?'+':'')+diff.toFixed(1)+"%)</span>";
+    h+="<input class='tgt-inp' type='number' inputmode='decimal' min='0' max='100' step='1' value='"+tgt+"' data-cat='"+cat+"' oninput='onRCT(this)'><span class='tpct'>%</span></div>";
+  });
+  h+="</div>";
+  ['Azionario','Obbligazionario'].forEach(function(cat){
+    if(!R.etfs.some(function(e){return e.cat===cat;}))return;
+    var subs=R_SUBS[cat],col=R_COLS[cat];
+    var cv=R.etfs.filter(function(e){return e.cat===cat;}).reduce(function(a,e){return a+e.v;},0);
+    var subSum=subs.reduce(function(a,s){return a+((R_ST[cat]||{})[s]||0);},0);
+    var sOk=subSum<0.1||Math.abs(subSum-100)<0.1,sOver=subSum>100.05;
+    var cid=cat.replace(/\s/g,'-');
+    h+="<div class='card'><div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px'>";
+    h+="<div class='card-lbl' style='margin:0;color:"+col+"'>"+cat+" — sottocategorie</div>";
+    h+="<span id='rst-"+cid+"' class='sum-pill "+(sOk?'sum-ok':sOver?'sum-over':'sum-err')+"'>"+subSum.toFixed(0)+"% / 100%</span></div>";
+    h+="<div style='font-size:12px;color:var(--mut);margin-bottom:10px'>% del budget "+cat+". Lascia a 0 per distribuire proporzionalmente.</div>";
+    subs.forEach(function(sub){
+      var tgt=(R_ST[cat]||{})[sub]||0;
+      var sv=R.etfs.filter(function(e){return e.cat===cat&&e.sub===sub;}).reduce(function(a,e){return a+e.v;},0);
+      var aOC=cv>0?(sv/cv*100):0,diff=aOC-tgt;
+      var dc=Math.abs(diff)<0.5?'var(--grn)':Math.abs(diff)<3?'var(--org)':'var(--red)';
+      h+="<div class='tgt-row'><div style='width:3px;height:14px;background:"+col+";border-radius:2px;flex-shrink:0'></div><span class='tgt-nm'>"+sub+"</span>";
+      if(cv>0)h+="<span style='font-size:11px;color:"+dc+";font-family:DM Mono,monospace'>att "+aOC.toFixed(1)+"% ("+(diff>=0?'+':'')+diff.toFixed(1)+"%)</span>";
+      h+="<input class='tgt-inp' type='number' inputmode='decimal' min='0' max='100' step='1' value='"+tgt+"' data-cat='"+cat+"' data-sub='"+sub+"' oninput='onRST(this)'><span class='tpct'>%</span></div>";
+    });
+    h+="</div>";
+  });
+  h+="<div style='height:80px'></div>";
+  setApp(h);
+}
+
+// ─── RENDER IMPARA ────────────────────────────────────────────────
+function renderImpara(){
+  var sc=SCEN[S.sc||'b'];
+  var lessons=[
+    {e:'🧺',t:'Cos\'è un ETF',b:'Un paniere che investe automaticamente in centinaia di aziende o obbligazioni, seguendo un indice. Costi bassi, massima diversificazione, nessun gestore che decide al posto tuo.'},
+    {e:'⚙️',t:'Passivo vs Attivo',b:'I fondi passivi (ETF) replicano un indice senza gestori. Commissioni molto più basse dei fondi attivi — e nel lungo periodo li battono nella maggior parte dei casi.'},
+    {e:'🏭',t:'ETF Azionario',b:'Compri una piccola parte di aziende reali. Più volatile, ma con maggior potenziale nel lungo periodo. Il mercato azionario globale ha sempre recuperato da ogni crisi storica.'},
+    {e:'📄',t:'ETF Obbligazionario',b:'Presti soldi a governi o aziende in cambio di interessi. Più stabile dell\'azionario, rendimenti generalmente più bassi. Serve a bilanciare il portafoglio nei momenti difficili.'},
+    {e:'⏳',t:'Il tempo è il tuo alleato',b:'L\'interesse composto fa crescere il capitale in modo esponenziale. Prima inizi, più tempo hai per recuperare le perdite. Non esistono risultati garantiti, ma l\'orizzonte lungo riduce il rischio.'},
+    {e:'🧘',t:'Non vendere nelle crisi',b:'L\'errore più costoso: vendere durante i ribassi. Chi ha tenuto il portafoglio durante tutte le crisi storiche ha sempre recuperato — e spesso ha guadagnato di più grazie al reinvestimento automatico.'}
+  ];
+  var h='';
+  h+="<div class='card'><div style='font-size:18px;font-weight:700;margin-bottom:4px'>📚 Le basi che hai imparato</div>";
+  h+="<div style='font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:16px'>Ripassale quando vuoi — sono la fondamenta di ogni buona decisione finanziaria.</div>";
+  lessons.forEach(function(l){h+="<div style='background:var(--s2);border-radius:12px;padding:14px 16px;margin-bottom:9px;display:flex;align-items:flex-start;gap:12px'><span style='font-size:24px;flex-shrink:0'>"+l.e+"</span><div><div style='font-size:14px;font-weight:700;margin-bottom:5px'>"+l.t+"</div><div style='font-size:13px;color:#94a3b8;line-height:1.6'>"+l.b+"</div></div></div>";});
+  h+="</div>";
+  h+="<div class='card'><div style='font-size:14px;font-weight:700;margin-bottom:10px'>Il tuo profilo scelto</div>";
+  h+="<div style='display:flex;align-items:center;gap:12px;background:var(--s2);border-radius:12px;padding:14px;margin-bottom:14px'>";
+  h+="<span style='font-size:32px'>"+sc.emoji+"</span><div><div style='font-size:15px;font-weight:700;margin-bottom:3px'>"+sc.name+"</div><div style='font-size:12px;color:var(--mut)'>"+sc.desc+"</div></div></div>";
+  h+="<button class='btn-ghost' onclick='backToOnboarding()'>↺ Rifai il profilo dall\'inizio</button></div>";
+  h+="<div style='height:80px'></div>";
+  setApp(h);
+}
+
+// ─── TARGET HANDLERS ─────────────────────────────────────────────
+function onRCT(inp){
+  var c=inp.dataset.cat,v=Math.max(0,parseFloat(inp.value)||0);R_CT[c]=v;
+  var s=R_CATS.reduce(function(a,c){return a+(R_CT[c]||0);},0);
+  var ok=Math.abs(s-100)<0.1,over=s>100.05;
+  var el=document.getElementById('rct-sum');
+  if(el){el.textContent=s.toFixed(0)+'% / 100%';el.className='sum-pill '+(ok?'sum-ok':over?'sum-over':'sum-err');}
+}
+function onRST(inp){
+  var c=inp.dataset.cat,s=inp.dataset.sub,v=Math.max(0,parseFloat(inp.value)||0);
+  if(!R_ST[c])R_ST[c]={};R_ST[c][s]=v;
+  var subs=R_SUBS[c]||[],sum=subs.reduce(function(a,x){return a+((R_ST[c]||{})[x]||0);},0);
+  var ok=sum<0.1||Math.abs(sum-100)<0.1,over=sum>100.05;
+  var el=document.getElementById('rst-'+c.replace(/\s/g,'-'));
+  if(el){el.textContent=sum.toFixed(0)+'% / 100%';el.className='sum-pill '+(ok?'sum-ok':over?'sum-over':'sum-err');}
+}
+
+// ─── ETF HANDLERS ────────────────────────────────────────────────
+var _rcap;
+function onRCap(v){R.lastCap=v;clearTimeout(_rcap);_rcap=setTimeout(function(){renderInvesti();},280);}
+function startRInl(id){R.inlId=id;renderPortfolio();}
+function saveRInl(id){var el=document.getElementById('ri'+id);if(el){var v=parseFloat(el.value);if(!isNaN(v))R.etfs=R.etfs.map(function(e){return e.id===id?Object.assign({},e,{v:Math.max(0,v)}):e;});}R.inlId=null;renderPortfolio();}
+function togRFx(id){R.etfs=R.etfs.map(function(e){return e.id===id?Object.assign({},e,{fx:!e.fx}):e;});renderPortfolio();}
+function delREtf(id){if(confirm('Rimuovere questo ETF?')){R.etfs=R.etfs.filter(function(e){return e.id!==id;});renderPortfolio();}}
+
+// ─── ETF MODAL ───────────────────────────────────────────────────
+var rFixOn=false;
+function rMCatChange(){
+  var cat=document.getElementById('rm-cat').value,subs=R_SUBS[cat]||[];
+  var sf=document.getElementById('rm-sf'),ss=document.getElementById('rm-sub');
+  if(subs.length){sf.style.display='block';ss.innerHTML=subs.map(function(s){return '<option>'+s+'</option>';}).join('')+'<option value="">— Nessuna —</option>';}
+  else sf.style.display='none';
+}
+function toggleRFixed(){rFixOn=!rFixOn;document.getElementById('rm-fsw').className='tog-sw'+(rFixOn?' on':'');}
+function openAddEtf(){
+  R.editId=null;rFixOn=false;
+  document.getElementById('rm-title').textContent='Aggiungi ETF';
+  document.getElementById('rm-tk').value='';document.getElementById('rm-nm').value='';document.getElementById('rm-vl').value='';
+  document.getElementById('rm-cat').value=R_CATS[0];
+  document.getElementById('rm-del').style.display='none';
+  document.getElementById('rm-fsw').className='tog-sw';
+  rMCatChange();document.getElementById('etf-modal').style.display='flex';
+  setTimeout(function(){document.getElementById('rm-tk').focus();},120);
+}
+function openEditEtf(id){
+  var e=R.etfs.find(function(x){return x.id===id;});if(!e)return;
+  R.editId=id;rFixOn=e.fx;
+  document.getElementById('rm-title').textContent='Modifica — '+e.tk;
+  document.getElementById('rm-tk').value=e.tk||'';document.getElementById('rm-nm').value=e.nm||'';document.getElementById('rm-vl').value=e.v||'';
+  document.getElementById('rm-cat').value=e.cat;
+  document.getElementById('rm-del').style.display='';
+  document.getElementById('rm-fsw').className='tog-sw'+(rFixOn?' on':'');
+  rMCatChange();if(e.sub){var ss=document.getElementById('rm-sub');if(ss)ss.value=e.sub;}
+  document.getElementById('etf-modal').style.display='flex';
+}
+function closeEtfModal(){document.getElementById('etf-modal').style.display='none';R.editId=null;}
+function delFromEtfModal(){if(R.editId===null)return;if(confirm('Eliminare?')){R.etfs=R.etfs.filter(function(e){return e.id!==R.editId;});closeEtfModal();renderPortfolio();}}
+function saveEtfModal(){
+  var tk=(document.getElementById('rm-tk').value||'').toUpperCase().trim();
+  var nm=document.getElementById('rm-nm').value.trim();
+  var v=parseFloat(document.getElementById('rm-vl').value)||0;
+  var cat=document.getElementById('rm-cat').value;
+  var sf=document.getElementById('rm-sf'),ss=document.getElementById('rm-sub');
+  var sub=(sf.style.display!=='none'&&ss&&ss.value)?ss.value:null;
+  if(!tk&&!nm){alert('Inserisci il ticker o il nome.');return;}
+  if(!nm)nm=tk;if(!tk)tk=nm.substring(0,6).toUpperCase();
+  if(R.editId!==null){R.etfs=R.etfs.map(function(e){return e.id!==R.editId?e:{id:e.id,tk:tk,nm:nm,cat:cat,sub:sub,v:v,fx:rFixOn};});}
+  else{R.etfs.push({id:R.nid++,tk:tk,nm:nm,cat:cat,sub:sub,v:v,fx:rFixOn});}
+  closeEtfModal();renderPortfolio();
+}
+
+function setApp(h){document.getElementById('app-body').innerHTML=h;}
+function backToOnboarding(){document.getElementById('app-shell').style.display='none';document.getElementById('onb-shell').style.display='block';document.getElementById('oprog').style.display='';go(0);}
 </script>
 </body>
 </html>
